@@ -22,6 +22,7 @@
                     libxkbcommon wayland # To use the wayland feature
                 ];
                 LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
+                RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
             };
         };
     };
