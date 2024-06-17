@@ -12,7 +12,6 @@ fn main() {
         bevy::diagnostic::EntityCountDiagnosticsPlugin,
         card_container::CardContainer,
         mini_editor::MiniEditor{editor_open: false}
-    
     ))
     .add_systems(Startup, setup_cam)
     .run()
