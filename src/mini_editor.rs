@@ -23,7 +23,13 @@ fn launch_editor(
 ) {
     if keys.just_pressed(KeyCode::KeyA){
         for mut editor in query.iter_mut() {
-            editor.editor_open = true;
+            /* if editor.editor_open == true {
+                editor.editor_open = false;
+            } else {
+                editor.editor_open = true;
+            }
+            */
+            editor.editor_open = !editor.editor_open;
             println!("{}", editor.editor_open.to_string());
         }
     }
