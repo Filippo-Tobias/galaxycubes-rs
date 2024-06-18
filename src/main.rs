@@ -1,28 +1,19 @@
 use bevy::prelude::*;
 use bevy_editor_pls::*;
-
-mod card_container;
+mod tower;
 mod mini_editor;
-
+mod game_camera;
 fn main() {
     App::new()
-    .add_plugins((DefaultPlugins,
+    .add_plugins((DefaultPlugins.set(ImagePlugin::default_nearest()),
         EditorPlugin::default(),
         bevy::diagnostic::FrameTimeDiagnosticsPlugin,
         bevy::diagnostic::EntityCountDiagnosticsPlugin,
-        card_container::CardContainer,
-        mini_editor::MiniEditor{editor_open: false}
+        mini_editor::MiniEditor{editor_open: false},
+        tower::Tower,
+        game_camera::GameCamera,
     ))
-    .add_systems(Startup, setup_cam)
     .run()
 }
 
-fn setup_cam(
-    mut commands: Commands,
-) {
-    let camera = Camera2dBundle {
-        transform: Transform::from_xyz(0.0, 0.0, 0.0),
-        ..default()
-    };
-    commands.spawn(camera);
-}
+
