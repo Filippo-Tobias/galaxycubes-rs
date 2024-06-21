@@ -3,6 +3,7 @@ use bevy_editor_pls::*;
 mod tower;
 mod mini_editor;
 mod game_camera;
+mod level_loader;
 fn main() {
     App::new()
     .add_plugins((DefaultPlugins.set(ImagePlugin::default_nearest()),
@@ -12,6 +13,7 @@ fn main() {
         mini_editor::MiniEditor{editor_open: false},
         tower::Tower,
         game_camera::GameCamera,
+        
     ))
     .run()
 }

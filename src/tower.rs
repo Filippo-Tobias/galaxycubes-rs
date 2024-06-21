@@ -34,7 +34,7 @@ fn setup(
             transform: Transform::from_xyz(
                 0.0,
                 0.5,
-                0.0,
+                -14.0,
             ),
             ..default()
         },
@@ -50,12 +50,4 @@ fn setup(
         transform: Transform::from_xyz(8.0, 16.0, 8.0),
         ..default()
     });
-
-    // ground plane
-    commands.spawn(PbrBundle {
-        mesh: meshes.add(Plane3d::default().mesh().size(50.0, 50.0)),
-        material: materials.add(Color::SILVER),
-        ..default()
-    });
-    
 }
