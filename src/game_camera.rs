@@ -37,7 +37,7 @@ fn pan_camera(
     let mut bounds = Vec3 { x: 8.0, y: 20.0, z: 8.0};
     for e in mouse_wheel_events.read() {
         transform.translation.y -= e.y;
-        transform.translation.y = transform.translation.y.clamp(3., bounds.y);
+        transform.translation.y = transform.translation.y.clamp(6., bounds.y);
     }
     if mouse_buttons.pressed(MouseButton::Left) {
         cursor_grab(primary_window);

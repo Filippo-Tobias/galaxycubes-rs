@@ -39,15 +39,4 @@ fn setup(
             ..default()
         },
     ));
-
-    commands.spawn(PointLightBundle {
-        point_light: PointLight {
-            shadows_enabled: true,
-            intensity: 10_000_000.,
-            range: 1000.0,
-            ..default()
-        },
-        transform: Transform::from_xyz(8.0, 16.0, 8.0),
-        ..default()
-    });
 }

@@ -13,7 +13,7 @@ fn main() {
         mini_editor::MiniEditor{editor_open: false},
         tower::Tower,
         game_camera::GameCamera,
-        
+        level_loader::LevelLoader,
     ))
     .run()
 }

@@ -1,8 +1,6 @@
 use bevy::prelude::*;
 #[derive(Component)]
-pub struct LevelLoader{
-    pub editor_open: bool,
-}
+pub struct LevelLoader;
 
 impl Plugin for LevelLoader {
     fn build(&self, app: &mut App) {
@@ -24,6 +22,17 @@ fn load_map(
             0.0,
             -14.0,
         ),
+        ..default()
+    });
+    
+    commands.spawn(PointLightBundle {
+        point_light: PointLight {
+            shadows_enabled: true,
+            intensity: 10_000_000.,
+            range: 1000.0,
+            ..default()
+        },
+        transform: Transform::from_xyz(8.0, 16.0, 8.0),
         ..default()
     });
 }
