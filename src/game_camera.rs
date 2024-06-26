@@ -35,6 +35,9 @@ fn pan_camera(
     let primary_window = q_windows.single_mut();
     let translation_multiplier: f32 = 0.005;
     let mut bounds = Vec3 { x: 8.0, y: 20.0, z: 8.0};
+    let rotation = transform.rotation;
+    let angle_to_y = rotation.to_euler(EulerRot::YXZ).1.to_degrees();
+    println!("{}", angle_to_y);
     for e in mouse_wheel_events.read() {
         transform.translation.y -= e.y;
         transform.translation.y = transform.translation.y.clamp(6., bounds.y);
@@ -45,7 +48,7 @@ fn pan_camera(
             let delta = event.delta;
 
             // Update camera translation
-            bounds.z = (80.0 / (f32::max(transform.translation.y/2.0, 1.0))).abs();
+            bounds.z = (80.0 / (f32::max(transform.translation.y/2.0, 4.0))).abs();
             transform.translation.x -= delta.x * translation_multiplier;
             transform.translation.z -= delta.y * translation_multiplier;
 
@@ -80,7 +83,6 @@ fn cursor_ungrab(
     window: Mut<Window>,
 ) {
     let mut primary_window = window;
-
     primary_window.cursor.grab_mode = CursorGrabMode::None;
     primary_window.cursor.visible = true;
 }
