@@ -36,12 +36,28 @@ fn pan_camera(
     let translation_multiplier: f32 = 0.005;
     let mut bounds = Vec3 { x: 8.0, y: 20.0, z: 8.0};
     let rotation = transform.rotation;
-    let angle_to_y = rotation.to_euler(EulerRot::YXZ).1.to_degrees();
-    println!("{}", angle_to_y);
+    let angle_to_y = rotation.to_euler(EulerRot::YXZ).1;
+
     for e in mouse_wheel_events.read() {
-        transform.translation.y -= e.y;
-        transform.translation.y = transform.translation.y.clamp(6., bounds.y);
+        let delta_y = e.y * angle_to_y.sin(); // Calculate the change in y and z based on the mouse wheel input
+        let delta_z = e.y * angle_to_y.cos();
+        let potential_y = transform.translation.y + delta_y; // Calculate the potential new y position
+        if potential_y >= 6. && potential_y <= bounds.y { // Check if the potential new y position is within bounds
+            transform.translation.y = potential_y; // If within bounds, apply both y and z movements
+            transform.translation.z -= delta_z;
+        } else {
+            let max_y_movement = if potential_y < 6. { // If out of bounds, determine the maximum allowed movement on the y axis
+                6. - transform.translation.y
+            } else {
+                bounds.y - transform.translation.y
+            };
+            let proportion = max_y_movement / delta_y; // Calculate the proportion of e.y that is allowed
+            transform.translation.y += max_y_movement; // Apply the maximum allowed movement on the y axis
+            transform.translation.z -= proportion * delta_z; // Adjust the z axis proportionally
+        }
+        transform.translation.y = transform.translation.y.clamp(6., bounds.y); // Clamp the y position to ensure it stays within bounds
     }
+    
     if mouse_buttons.pressed(MouseButton::Left) {
         cursor_grab(primary_window);
         for event in mouse_event_reader.read() {
