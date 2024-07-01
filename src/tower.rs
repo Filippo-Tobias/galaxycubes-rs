@@ -34,11 +34,12 @@ fn setup(
     let mut tower_transform = Transform::from_xyz(
         0.0, 
         0.5, 
-        -14.0);
-        tower_transform.rotation = rotation_quat;
+        -10.0);
+        //tower_transform.rotation = rotation_quat;
     let rotation_x_radians: f32 = euler_angles.1;
-    let rotation_x_degrees: f32 = rotation_x_radians.to_degrees();
+    let _rotation_x_degrees: f32 = rotation_x_radians.to_degrees();
     //println!("{}",rotation_x_degrees);
+    
     commands.spawn((
         PbrBundle {
             mesh: shape_handle,

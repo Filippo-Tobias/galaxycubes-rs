@@ -24,7 +24,8 @@ fn load_map(
         ),
         ..default()
     });
-    
+
+    // light
     commands.spawn(PointLightBundle {
         point_light: PointLight {
             shadows_enabled: true,
