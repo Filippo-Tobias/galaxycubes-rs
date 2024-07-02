@@ -68,7 +68,8 @@ fn check_if_hovering_over_tower(
     }
 
     if mouse_buttons.pressed(MouseButton::Left) == false && hover.locked == true {
-        hover.hovering = false
+        hover.hovering = false;
+        hover.locked = false
     }
 }
 
@@ -90,7 +91,7 @@ fn pan_camera(
     for e in mouse_wheel_events.read() {
         total_y_movement += e.y
     }
-    zoom_perspective(query_camera_projection, 1.0 - total_y_movement*0.02);
+    zoom_perspective(query_camera_projection, 1.0 - total_y_movement*0.05);
 
     if mouse_buttons.pressed(MouseButton::Left) && hover.hovering == false{
         cursor_grab(primary_window);
