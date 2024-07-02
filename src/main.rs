@@ -5,6 +5,7 @@ mod mini_editor;
 mod game_camera;
 mod level_loader;
 mod floor_tile_mesh;
+use bevy_mod_picking::prelude::*;
 fn main() {
     App::new()
     .add_plugins((DefaultPlugins.set(ImagePlugin::default_nearest()),
@@ -15,6 +16,7 @@ fn main() {
         tower::Tower,
         game_camera::GameCamera,
         level_loader::LevelLoader,
+        DefaultPickingPlugins,
     ))
     .run()
 }

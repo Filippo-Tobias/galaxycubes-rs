@@ -46,25 +46,26 @@ fn make_map(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     println!("raaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaan");
-    let spawn_positions = (DVec3{x: -14.4,y: 0.0,z: -14.4}, DVec3{x: 14.4,y: 0.0,z: 14.4});
+    let spawn_positions = (DVec3{x: -21.6,y: 0.0,z: -26.4}, DVec3{x: 21.6,y: 0.0,z: 8.4});
+    //let spawn_positions = (DVec3{x: 0.0,y: 0.0,z: 0.0}, DVec3{x: 0.0,y: 0.0,z: 0.0});
     let floor_tile_mesh = floor_tile_mesh::create_floor_tile_mesh(&mut meshes);
 
     //Calculate the amount of tiles
     let tiles_x = ((spawn_positions.0.x - spawn_positions.1.x).abs() / 1.2).round() as i32;
     let tiles_z = ((spawn_positions.0.z - spawn_positions.1.z).abs() / 1.2).round() as i32;
     let mut position: DVec3 = spawn_positions.0;
-    for i in 0..tiles_x {
-        for j in 0..tiles_z{
+    for _i in 0..tiles_x {
+        for _j in 0..tiles_z{
             commands.spawn(PbrBundle {
                 mesh: floor_tile_mesh.clone(),
                 material: materials.add(StandardMaterial {
-                    base_color: Color::rgb(0.8, 0.7, 0.6),
+                    base_color: Color::rgb(0.2, 0.2, 0.2),
                     ..Default::default()
                 }),
                 transform: Transform::from_xyz(position.x as f32, position.y as f32, position.z as f32),
                 ..Default::default()
             });
-            println!("x: {}, y: {}, z: {}, i: {}, j: {}, tiles_x: {}", position.x, position.y, position.z, i, j, tiles_x);
+            //println!("x: {}, y: {}, z: {}, i: {}, j: {}, tiles_x: {}", position.x, position.y, position.z, i, j, tiles_x);
             position.z += 1.2;
         }
         position.z = spawn_positions.0.z;

@@ -1,17 +1,25 @@
 use bevy::{input::mouse::{MouseMotion, MouseWheel}, prelude::*, render::camera::RenderTarget, window::{CursorGrabMode, PrimaryWindow, WindowRef}};
 
+use crate::tower::{TowerHovered, TowerUnHovered};
+
 #[derive(Component)]
 pub struct GameCamera;
 
 impl Plugin for GameCamera {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup);
-        app.add_systems(Update, pan_camera);
+        app.add_systems(Update, (pan_camera, check_if_hovering_over_tower));
     }
 }
 
+#[derive(Component)]
+struct HoverState {
+    hovering: bool,
+    locked: bool,
+}
+
 fn setup(mut commands: Commands) {
-    commands.spawn((
+    let mut camera_instance = commands.spawn((
         Camera3dBundle {
             transform: Transform::from_xyz(0.0, 10.0, 0.0).looking_at(Vec3::new(0.0, 0.0, -6.0), Vec3::Y),
             camera: Camera {
@@ -22,49 +30,74 @@ fn setup(mut commands: Commands) {
         },
         GameCamera,
     ));
+    camera_instance.insert(HoverState{hovering: false, locked: false});   
+}
+
+fn zoom_perspective(
+    mut query_camera: Query<&mut Projection, With<GameCamera>>,
+    zoom: f32
+) {
+    let Projection::Perspective(perspective) = query_camera.single_mut().into_inner() else {
+        return;
+    };
+    // zoom in
+    //println!("{}", perspective.fov);
+    perspective.fov *= zoom;
+    perspective.fov = perspective.fov.clamp(0.5, 1.0);
+}
+
+fn check_if_hovering_over_tower(
+    mut query_hover: Query<&mut HoverState, With<GameCamera>>,
+    mut hovered_events: EventReader<TowerHovered>,
+    mut unhovered_events: EventReader<TowerUnHovered>,
+    mouse_buttons: Res<ButtonInput<MouseButton>>,
+) {
+    let mut hover = query_hover.single_mut();
+    for _event in hovered_events.read() {
+        if mouse_buttons.pressed(MouseButton::Left) == false {
+            hover.hovering = true
+        }
+    }
+
+    for _event in unhovered_events.read() {
+        if mouse_buttons.pressed(MouseButton::Left) == false {
+            hover.hovering = false
+        } else {
+            hover.locked = true
+        }
+    }
+
+    if mouse_buttons.pressed(MouseButton::Left) == false && hover.locked == true {
+        hover.hovering = false
+    }
 }
 
 fn pan_camera(
-    mut query: Query<&mut Transform, With<GameCamera>>,
+    mut query_transform: Query<&mut Transform, With<GameCamera>>,
+    mut query_hover: Query<&mut HoverState, With<GameCamera>>,
+        query_camera_projection: Query<&mut Projection, With<GameCamera>>,
+    mut query_windows: Query<&mut Window, With<PrimaryWindow>>,
     mut mouse_event_reader: EventReader<MouseMotion>,
-    mouse_buttons: Res<ButtonInput<MouseButton>>,
-    mut q_windows: Query<&mut Window, With<PrimaryWindow>>,
     mut mouse_wheel_events: EventReader<MouseWheel>,
+    mouse_buttons: Res<ButtonInput<MouseButton>>,
 ) {
-    let mut transform = query.single_mut();
-    let primary_window = q_windows.single_mut();
+    let hover = query_hover.single_mut();
+    let mut transform = query_transform.single_mut();
+    let primary_window = query_windows.single_mut();
     let translation_multiplier: f32 = 0.005;
-    let mut bounds = Vec3 { x: 8.0, y: 20.0, z: 8.0};
-    let rotation = transform.rotation;
-    let angle_to_y = rotation.to_euler(EulerRot::YXZ).1;
-
+    let bounds = Vec3 { x: 8.0, y: 20.0, z: 8.0};
+    let mut total_y_movement: f32 = 0.0;
     for e in mouse_wheel_events.read() {
-        let delta_y = e.y * angle_to_y.sin(); // Calculate the change in y and z based on the mouse wheel input
-        let delta_z = e.y * angle_to_y.cos();
-        let potential_y = transform.translation.y + delta_y; // Calculate the potential new y position
-        if potential_y >= 6. && potential_y <= bounds.y { // Check if the potential new y position is within bounds
-            transform.translation.y = potential_y; // If within bounds, apply both y and z movements
-            transform.translation.z -= delta_z;
-        } else {
-            let max_y_movement = if potential_y < 6. { // If out of bounds, determine the maximum allowed movement on the y axis
-                6. - transform.translation.y
-            } else {
-                bounds.y - transform.translation.y
-            };
-            let proportion = max_y_movement / delta_y; // Calculate the proportion of e.y that is allowed
-            transform.translation.y += max_y_movement; // Apply the maximum allowed movement on the y axis
-            transform.translation.z -= proportion * delta_z; // Adjust the z axis proportionally
-        }
-        transform.translation.y = transform.translation.y.clamp(6., bounds.y); // Clamp the y position to ensure it stays within bounds
+        total_y_movement += e.y
     }
-    
-    if mouse_buttons.pressed(MouseButton::Left) {
+    zoom_perspective(query_camera_projection, 1.0 - total_y_movement*0.02);
+
+    if mouse_buttons.pressed(MouseButton::Left) && hover.hovering == false{
         cursor_grab(primary_window);
         for event in mouse_event_reader.read() {
             let delta = event.delta;
 
             // Update camera translation
-            bounds.z = (80.0 / (f32::max(transform.translation.y/2.0, 4.0))).abs();
             transform.translation.x -= delta.x * translation_multiplier;
             transform.translation.z -= delta.y * translation_multiplier;
 
@@ -82,16 +115,8 @@ fn cursor_grab(
     window: Mut<Window>,
 ) {
     let mut primary_window = window;
-
-    // if you want to use the cursor, but not let it leave the window,
-    // use `Confined` mode:
     primary_window.cursor.grab_mode = CursorGrabMode::Confined;
-
-    // for a game that doesn't use the cursor (like a shooter):
-    // use `Locked` mode to keep the cursor in one place
     primary_window.cursor.grab_mode = CursorGrabMode::Locked;
-
-    // also hide the cursor
     primary_window.cursor.visible = false;
 }
 

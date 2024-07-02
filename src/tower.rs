@@ -1,13 +1,47 @@
 use bevy::prelude::*;
+use bevy_mod_picking::prelude::*;
+use pointer::Location;
+
 #[derive(Component)]
 pub struct Tower;
 
+#[derive(Event)]
+pub struct TowerHovered {
+    pub entity: Entity,
+    pub position: Location,
+}
+#[derive(Event)]
+pub struct TowerUnHovered {
+    pub entity: Entity,
+    pub position: Location,
+}
+
+impl From<ListenerInput<Pointer<Out>>> for TowerUnHovered {
+    fn from(input: ListenerInput<Pointer<Out>>) -> Self {
+        TowerUnHovered {
+            entity: input.target,
+            position: input.pointer_location.clone()
+        }
+    }
+}
+
+impl From<ListenerInput<Pointer<Over>>> for TowerHovered {
+    fn from(input: ListenerInput<Pointer<Over>>) -> Self {
+        TowerHovered {
+            entity: input.target,
+            position: input.pointer_location.clone()
+        }
+    }
+}
 
 impl Plugin for Tower{
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup);
+        app.add_event::<TowerHovered>();
+        app.add_event::<TowerUnHovered>();
     }
 }
+
 
 fn setup(
     mut commands: Commands,
@@ -45,5 +79,10 @@ fn setup(
             transform: tower_transform,
             ..default()
         },
+        On::<Pointer<Over>>::send_event::<TowerHovered>(),
+        On::<Pointer<Out>>::send_event::<TowerUnHovered>(),
+        On::<Pointer<Drag>>::target_component_mut::<Transform>(|drag, transform| {
+            transform.rotate_local_y(drag.delta.x / 50.0)
+        }),
     ));
 }
