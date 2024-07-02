@@ -15,7 +15,6 @@ fn main() {
         tower::Tower,
         game_camera::GameCamera,
         level_loader::LevelLoader,
-        floor_tile_mesh::FloorTileMesh,
     ))
     .run()
 }

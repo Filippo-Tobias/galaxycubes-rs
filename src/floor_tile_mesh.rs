@@ -1,19 +1,27 @@
 use bevy::prelude::*;
 use bevy::render::mesh::{Indices, Mesh};
-use bevy::render::render_resource::PrimitiveTopology;
 use bevy::render::render_asset::RenderAssetUsages;
+use bevy::render::render_resource::PrimitiveTopology;
 
-#[derive(Component)]
-pub struct FloorTileMesh;
+pub fn create_floor_tile_mesh(meshes: &mut Assets<Mesh>) -> Handle<Mesh> {
+    let indices = Indices::U32(vec![
+        0,3,1, 2,3,0,
+        6,7,4, 4,7,5,
+        8,11,9, 10,11,8,
+        13,15,12, 12,15,14,
+        16,19,17, 18,19,16,
+        20,23,21, 22,23,20,
+        24,27,25, 26,27,24,
+        28,31,29, 30,31,28,
+        32,35,33, 34,35,32,
+        36,39,37, 38,39,36,
+        41,43,40, 40,43,42,
+        44,47,45, 46,47,44,
+        49,51,48, 48,51,50,
 
-impl Plugin for FloorTileMesh {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup);
-    }
-}
+    ]);
 
-fn setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut materials: ResMut<Assets<StandardMaterial>>) {
-    // Define vertices for the custom mesh
+
     let vertices = vec![
         // Bottom
         [0.6, 0.0, 0.6,], // 0
@@ -245,49 +253,11 @@ fn setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut materials
         [0.0, 1.0], // 19
     ];
 
-    let indices = Indices::U32(vec![
-        0,3,1, 2,3,0,
-        6,7,4, 4,7,5,
-        8,11,9, 10,11,8,
-        13,15,12, 12,15,14,
-        16,19,17, 18,19,16,
-        20,23,21, 22,23,20,
-        24,27,25, 26,27,24,
-        28,31,29, 30,31,28,
-        32,35,33, 34,35,32,
-        36,39,37, 38,39,36,
-        41,43,40, 40,43,42,
-        44,47,45, 46,47,44,
-        49,51,48, 48,51,50,
-
-    ]);
-
-    // Create the mesh
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList, RenderAssetUsages::default());
     mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vertices);
     mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
     mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
     mesh.insert_indices(indices);
 
-    // Add mesh to the scene
-    commands.spawn(PbrBundle {
-        mesh: meshes.add(mesh),
-        material: materials.add(StandardMaterial {
-            base_color: Color::rgb(0.8, 0.7, 0.6),
-            ..Default::default()
-        }),
-        transform: Transform::from_xyz(0.0, 0.0, -10.0),
-        ..Default::default()
-    });
-
-    // Add light
-    commands.spawn(PointLightBundle {
-        point_light: PointLight {
-            intensity: 1500.0,
-            range: 100.0,
-            ..Default::default()
-        },
-        transform: Transform::from_xyz(4.0, 8.0, 4.0),
-        ..Default::default()
-    });
+    meshes.add(mesh)
 }
