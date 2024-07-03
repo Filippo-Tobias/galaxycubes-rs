@@ -47,7 +47,7 @@ fn make_map(
 ) {
     println!("raaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaan");
     let spawn_positions = (DVec3{x: -21.6,y: 0.0,z: -26.4}, DVec3{x: 21.6,y: 0.0,z: 8.4});
-    //let spawn_positions = (DVec3{x: 0.0,y: 0.0,z: 0.0}, DVec3{x: 0.0,y: 0.0,z: 0.0});
+    //let spawn_positions = (DVec3{x: 0.0,y: 0.0,z: 0.0}, DVec3{x: 1.2,y: 0.0,z: 1.2});
     let floor_tile_mesh = floor_tile_mesh::create_floor_tile_mesh(&mut meshes);
 
     //Calculate the amount of tiles

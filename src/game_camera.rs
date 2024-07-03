@@ -61,28 +61,32 @@ fn check_if_hovering_over_tower(
 
     for _event in unhovered_events.read() {
         if mouse_buttons.pressed(MouseButton::Left) == false {
-            hover.hovering = false
+            hover.hovering = false;
+            println!("unhovered")
         } else {
-            hover.locked = true
+            hover.locked = true;
+            println!("locked")
         }
     }
 
     if mouse_buttons.pressed(MouseButton::Left) == false && hover.locked == true {
         hover.hovering = false;
-        hover.locked = false
+        hover.locked = false;
+        println!("unhovered, unlocked")
     }
 }
 
 fn pan_camera(
     mut query_transform: Query<&mut Transform, With<GameCamera>>,
-    mut query_hover: Query<&mut HoverState, With<GameCamera>>,
-        query_camera_projection: Query<&mut Projection, With<GameCamera>>,
+    query_hover: Query<&mut HoverState, With<GameCamera>>,
+    query_camera_projection: Query<&mut Projection, With<GameCamera>>,
     mut query_windows: Query<&mut Window, With<PrimaryWindow>>,
     mut mouse_event_reader: EventReader<MouseMotion>,
     mut mouse_wheel_events: EventReader<MouseWheel>,
     mouse_buttons: Res<ButtonInput<MouseButton>>,
 ) {
-    let hover = query_hover.single_mut();
+    let hover_iter = query_hover.iter();
+    let mut hover: bool = false;
     let mut transform = query_transform.single_mut();
     let primary_window = query_windows.single_mut();
     let translation_multiplier: f32 = 0.005;
@@ -92,8 +96,12 @@ fn pan_camera(
         total_y_movement += e.y
     }
     zoom_perspective(query_camera_projection, 1.0 - total_y_movement*0.05);
-
-    if mouse_buttons.pressed(MouseButton::Left) && hover.hovering == false{
+    for hover_state in hover_iter {
+        if hover_state.hovering == true {
+            hover = true
+        }
+    }
+    if mouse_buttons.pressed(MouseButton::Left) && hover == false{
         cursor_grab(primary_window);
         for event in mouse_event_reader.read() {
             let delta = event.delta;

@@ -72,9 +72,13 @@ fn setup(
     let _rotation_x_degrees: f32 = rotation_x_radians.to_degrees();
     //println!("{}",rotation_x_degrees);
     
-    commands.spawn((
+    let tower_transform2 = Transform::from_xyz(
+        5.0, 
+        0.5, 
+        -10.0);
+    /*commands.spawn((
         PbrBundle {
-            mesh: shape_handle,
+            mesh: shape_handle.clone(),
             material: shape_material.clone(),
             transform: tower_transform,
             ..default()
@@ -82,7 +86,23 @@ fn setup(
         On::<Pointer<Over>>::send_event::<TowerHovered>(),
         On::<Pointer<Out>>::send_event::<TowerUnHovered>(),
         On::<Pointer<Drag>>::target_component_mut::<Transform>(|drag, transform| {
-            transform.rotate_local_y(drag.delta.x / 50.0)
+            transform.translation.x += drag.delta.x * 0.115;
+            transform.translation.z += drag.delta.y * 0.115;
         }),
     ));
-}
+        */
+    commands.spawn((
+        PbrBundle {
+            mesh: shape_handle.clone(),
+            material: shape_material.clone(),
+            transform: tower_transform2,
+            ..default()
+        },
+        On::<Pointer<Over>>::send_event::<TowerHovered>(),
+        On::<Pointer<Out>>::send_event::<TowerUnHovered>(),
+        On::<Pointer<Drag>>::target_component_mut::<Transform>(|drag, transform| {
+            transform.translation.x += drag.delta.x * 0.005;
+            transform.translation.z += drag.delta.y * 0.005;
+        }),
+    ));
+} 
