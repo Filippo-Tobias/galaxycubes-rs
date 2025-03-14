@@ -5,7 +5,7 @@
         nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     };
 
-    outputs = { self, nixpkgs }: {
+    outputs = { self, nixpkgs, }: {
         devShells.x86_64-linux =
         let
             pkgs = import nixpkgs { system = "x86_64-linux"; };
@@ -16,6 +16,7 @@
                     pkg-config
                 ];
                 buildInputs = with pkgs; [
+		                neovim tmux
                     rustup
                     rust-analyzer
                     udev alsa-lib vulkan-loader
@@ -25,6 +26,7 @@
                 shellHook = ''
                   rustup default stable
                   rustup component add rust-analyzer
+                  #export CARGO_MANIFEST_DIR=$(realpath ./)
                 '';
                 LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
                 RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";

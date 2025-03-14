@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_editor_pls::*;
+use bevy_mod_picking::prelude::*;
 mod tower;
 mod mini_editor;
 mod game_camera;
@@ -29,6 +30,8 @@ fn main() {
         tower::Tower,
         game_camera::GameCamera,
         level_loader::LevelLoader,
+        dropbar::DropBar,
+        dropable::Dropable,
         DefaultPickingPlugins,
         
     ))
