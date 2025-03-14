@@ -6,10 +6,10 @@ use bevy::render::render_resource::PrimitiveTopology;
 pub fn create_floor_tile_mesh(meshes: &mut Assets<Mesh>) -> Handle<Mesh> {
     let indices = Indices::U32(vec![
         0,3,1, 2,3,0,
-        //6,7,4, 4,7,5,
-        //8,11,9, 10,11,8,
-        //13,15,12, 12,15,14,
-        //16,19,17, 18,19,16,
+        6,7,4, 4,7,5,
+        8,11,9, 10,11,8,
+        13,15,12, 12,15,14,
+        16,19,17, 18,19,16,
         20,23,21, 22,23,20,
         24,27,25, 26,27,24,
         28,31,29, 30,31,28,
