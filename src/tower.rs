@@ -1,3 +1,5 @@
+use std::ptr::null;
+
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 use pointer::Location;
@@ -8,13 +10,11 @@ use crate::game_camera::GameCamera;
 pub struct Tower;
 
 #[derive(Event)]
-#[allow(dead_code)]
 pub struct TowerHovered {
     pub entity: Entity,
     pub position: Location,
 }
 #[derive(Event)]
-#[allow(dead_code)]
 pub struct TowerUnHovered {
     pub entity: Entity,
     pub position: Location,
@@ -25,7 +25,6 @@ pub struct TowerDragged{
 }
 
 #[derive(Component)]
-#[allow(dead_code)]
 pub struct TowerMovement {
     moving: bool
 }
@@ -72,6 +71,7 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    windows: Query<&Window>,
 ) {
     let texture_handle = asset_server.load("Player1.png");
 
@@ -83,6 +83,10 @@ fn setup(
 
     let shape_handle = 
         meshes.add(Cuboid::default());
+    let cos_pi_8 = (2.0 + (2.0_f32).sqrt()).sqrt() / 2.0;
+    let sin_pi_8 = (2.0 - (2.0_f32).sqrt()).sqrt() / 2.0;
+    let rotation_quat = Quat::from_xyzw(cos_pi_8, 0.0, 0.0, sin_pi_8);
+    let euler_angles: (f32, f32, f32) = rotation_quat.to_euler(EulerRot::YXZ);
     let tower_transform = Transform::from_xyz(
         0.0, 
         0.5, 

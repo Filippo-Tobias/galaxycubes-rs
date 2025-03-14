@@ -1,7 +1,6 @@
 use bevy::{input::mouse::{MouseMotion, MouseWheel}, prelude::*, render::camera::RenderTarget, window::{CursorGrabMode, PrimaryWindow, WindowRef}};
-use bevy_mod_picking::pointer::PointerInteraction;
 
-use crate::{tower::{Tower, TowerHovered, TowerUnHovered}, ui::UI};
+use crate::tower::{TowerHovered, TowerUnHovered};
 
 #[derive(Component)]
 pub struct GameCamera;
@@ -9,7 +8,7 @@ pub struct GameCamera;
 impl Plugin for GameCamera {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup);
-        app.add_systems(Update, (pan_camera, check_hit));
+        app.add_systems(Update, (pan_camera, check_if_hovering_over_tower));
     }
 }
 
@@ -25,7 +24,6 @@ fn setup(mut commands: Commands) {
             transform: Transform::from_xyz(0.0, 10.0, 0.0).looking_at(Vec3::new(0.0, 0.0, -6.0), Vec3::Y),
             camera: Camera {
                 target: RenderTarget::Window(WindowRef::Primary),
-                order: 0,
                 ..default()
             },
             ..default()
@@ -48,30 +46,21 @@ fn zoom_perspective(
     perspective.fov = perspective.fov.clamp(0.5, 1.0);
 }
 
-fn check_if_hovering_element(
+fn check_if_hovering_over_tower(
     mut query_hover: Query<&mut HoverState, With<GameCamera>>,
-    mut tower_hovered_events: EventReader<TowerHovered>,
-    mut tower_unhovered_events: EventReader<TowerUnHovered>,
-    mut ui_hovered_events: EventReader<HoveredUI>,
-    mut ui_unhovered_events: EventReader<UnhoveredUI>,
+    mut hovered_events: EventReader<TowerHovered>,
+    mut unhovered_events: EventReader<TowerUnHovered>,
     mouse_buttons: Res<ButtonInput<MouseButton>>,
 ) {
     let mut hover = query_hover.single_mut();
-
-    for _event in tower_hovered_events.read() {
-        if !mouse_buttons.pressed(MouseButton::Left) {
+    for _event in hovered_events.read() {
+        if mouse_buttons.pressed(MouseButton::Left) == false {
             hover.hovering = true
         }
     }
 
-    for _event in ui_hovered_events.read() {
-        if !mouse_buttons.pressed(MouseButton::Left) {
-            hover.hovering = true
-        }
-    }
-
-    for _event in tower_unhovered_events.read() {
-        if !mouse_buttons.pressed(MouseButton::Left) {
+    for _event in unhovered_events.read() {
+        if mouse_buttons.pressed(MouseButton::Left) == false {
             hover.hovering = false;
             println!("unhovered")
         } else {
@@ -80,17 +69,7 @@ fn check_if_hovering_element(
         }
     }
 
-    for _event in ui_unhovered_events.read() {
-        if !mouse_buttons.pressed(MouseButton::Left) {
-            hover.hovering = false;
-            println!("unhovered")
-        } else {
-            hover.locked = true;
-            println!("locked")
-        }
-    }
-
-    if !mouse_buttons.pressed(MouseButton::Left) && hover.locked {
+    if mouse_buttons.pressed(MouseButton::Left) == false && hover.locked == true {
         hover.hovering = false;
         hover.locked = false;
         println!("unhovered, unlocked")
@@ -118,11 +97,11 @@ fn pan_camera(
     }
     zoom_perspective(query_camera_projection, 1.0 - total_y_movement*0.05);
     for hover_state in hover_iter {
-        if hover_state.hovering {
+        if hover_state.hovering == true {
             hover = true
         }
     }
-    if mouse_buttons.pressed(MouseButton::Left) && !hover{
+    if mouse_buttons.pressed(MouseButton::Left) && hover == false{
         cursor_grab(primary_window);
         for event in mouse_event_reader.read() {
             let delta = event.delta;
@@ -156,20 +135,4 @@ fn cursor_ungrab(
     let mut primary_window = window;
     primary_window.cursor.grab_mode = CursorGrabMode::None;
     primary_window.cursor.visible = true;
-}
-
-fn check_hit(
-    pointer_query: Query<&PointerInteraction>,
-    tower_query: Query<&Tower>,
-    ui_query: Query<&UI>,
-) {
-    let mut entity_count 
-    for pointer_interaction in pointer_query.iter() {
-        if let Some((entity, _hit_data)) = pointer_interaction.get_nearest_hit() {
-            // Check if the nearest hit entity has `MyComponent`
-            if let Ok(_tower) = tower_query.get(*entity) {
-                // Entity has `MyComponent`, so you can process it here
-            }
-        }
-    }
 }

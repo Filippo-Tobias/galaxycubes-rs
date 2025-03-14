@@ -30,7 +30,7 @@ fn launch_editor(
             }
             */
             editor.editor_open = !editor.editor_open;
-            println!("{}", editor.editor_open);
+            println!("{}", editor.editor_open.to_string());
         }
     }
 }
