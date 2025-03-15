@@ -8,29 +8,30 @@ use bevy::render::settings::Backends;
 use bevy::render::settings::WgpuSettings;
 use bevy::render::settings::RenderCreation;
 use bevy::render::RenderPlugin;
+use bevy_embedded_assets::EmbeddedAssetPlugin;
 fn main() {
     App::new()
-    .add_plugins((
-        DefaultPlugins
-        .set(ImagePlugin::default_nearest())
-        .set(RenderPlugin {
-            render_creation: RenderCreation::Automatic(WgpuSettings {
-                backends: Some(Backends::VULKAN),
-                ..Default::default()
-            }),
-            ..Default::default()
-        }),
+    .add_plugins((   
+        EmbeddedAssetPlugin{mode: bevy_embedded_assets::PluginMode::ReplaceDefault},
         bevy::diagnostic::FrameTimeDiagnosticsPlugin,
         bevy::diagnostic::EntityCountDiagnosticsPlugin,
-        mini_editor::MiniEditor{editor_open: false},
+        //mini_editor::MiniEditor{editor_open: false},
         tower::Tower,
         game_camera::GameCamera,
         level_loader::LevelLoader,
         MeshPickingPlugin,
+        DefaultPlugins
+        .set(ImagePlugin::default_nearest())
+        .set(RenderPlugin {
+            render_creation: RenderCreation::Automatic(WgpuSettings {
+                backends: {Some(Backends::BROWSER_WEBGPU); Some(Backends::VULKAN); Some(Backends::GL)},
+                
+                ..Default::default()
+            }),
+            ..Default::default()
+        }),
         
         
     ))
     .run();
 }
-
-
