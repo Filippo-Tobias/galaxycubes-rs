@@ -11,20 +11,7 @@ impl Plugin for LevelLoader {
 
 fn load_map(
     mut commands: Commands,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    mut meshes: ResMut<Assets<Mesh>>,
 ) {
-    //let spawn_positions =
-    // ground plane
-    commands.spawn((
-        Mesh3d(meshes.add(Plane3d::default().mesh().size(50.0, 50.0))),
-        MeshMaterial3d(materials.add(StandardMaterial {
-            base_color: Color::srgb(0.75, 0.75, 0.75), // silver-like color
-            ..default()
-        })),
-        Transform::from_xyz(0.0, -0.1, -14.0),
-    ));
-
     // light
     commands.spawn((
         PointLight {
@@ -42,8 +29,8 @@ fn make_map(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    println!("raaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaan");
     let spawn_positions = (DVec3{x: -21.6,y: 0.0,z: -26.4}, DVec3{x: 21.6,y: 0.0,z: 8.4});
+    //let spawn_positions = (DVec3{x: -3.6,y: 0.0,z: -3.6}, DVec3{x: 3.6,y: 0.0,z: 3.6});
     //let spawn_positions = (DVec3{x: 0.0,y: 0.0,z: 0.0}, DVec3{x: 1.2,y: 0.0,z: 1.2});
     let floor_tile_mesh = floor_tile_mesh::create_floor_tile_mesh(&mut meshes);
 
@@ -51,16 +38,17 @@ fn make_map(
     let tiles_x = ((spawn_positions.0.x - spawn_positions.1.x).abs() / 1.2).round() as i32;
     let tiles_z = ((spawn_positions.0.z - spawn_positions.1.z).abs() / 1.2).round() as i32;
     let mut position: DVec3 = spawn_positions.0;
+    let material_handle = materials.add(StandardMaterial {
+        base_color: Color::srgb(0.2, 0.2, 0.2),
+        ..Default::default()
+    });
     for _i in 0..tiles_x {
         for _j in 0..tiles_z{
             commands.spawn((
                 Mesh3d(floor_tile_mesh.clone()),
-                MeshMaterial3d(materials.add(StandardMaterial {
-                    base_color: Color::srgb(0.2, 0.2, 0.2),
-                    ..Default::default()
-                })),
+                MeshMaterial3d(material_handle.clone()),
                 Transform::from_xyz(position.x as f32, position.y as f32, position.z as f32),
-            ));
+            )); //Find way to declare bundle once and clone it inside the loop.
             //println!("x: {}, y: {}, z: {}, i: {}, j: {}, tiles_x: {}", position.x, position.y, position.z, i, j, tiles_x);
             position.z += 1.2;
         }

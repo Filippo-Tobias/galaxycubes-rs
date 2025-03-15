@@ -12,19 +12,24 @@ use bevy_embedded_assets::EmbeddedAssetPlugin;
 fn main() {
     App::new()
     .add_plugins((   
-        EmbeddedAssetPlugin{mode: bevy_embedded_assets::PluginMode::ReplaceDefault},
-        bevy::diagnostic::FrameTimeDiagnosticsPlugin,
-        bevy::diagnostic::EntityCountDiagnosticsPlugin,
+        //EmbeddedAssetPlugin{mode: bevy_embedded_assets::PluginMode::ReplaceDefault},
         //mini_editor::MiniEditor{editor_open: false},
         tower::Tower,
         game_camera::GameCamera,
         level_loader::LevelLoader,
         MeshPickingPlugin,
         DefaultPlugins
+        .set(WindowPlugin {
+            primary_window: Some(Window {
+                present_mode: bevy::window::PresentMode::AutoNoVsync,
+                ..Default::default()
+            }),
+            ..Default::default()
+        })
         .set(ImagePlugin::default_nearest())
         .set(RenderPlugin {
             render_creation: RenderCreation::Automatic(WgpuSettings {
-                backends: {Some(Backends::BROWSER_WEBGPU); Some(Backends::VULKAN); Some(Backends::GL)},
+                backends: {Some(Backends::BROWSER_WEBGPU); Some(Backends::VULKAN)},
                 
                 ..Default::default()
             }),

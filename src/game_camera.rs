@@ -68,9 +68,8 @@ fn check_if_hovering_over_tower(
     }
 
     if mouse_buttons.pressed(MouseButton::Left) == false && hover.locked == true {
-        hover.hovering = false;
         hover.locked = false;
-        println!("unhovered, unlocked")
+        println!("unlocked")
     }
 }
 
