@@ -23,6 +23,7 @@ fn setup(mut commands: Commands) {
         Camera3d::default(),
         Transform::from_xyz(0.0, 10.0, 0.0).looking_at(Vec3::new(0.0, 0.0, -6.0), Vec3::Y),
         Camera {
+            order: 0,
             target: RenderTarget::Window(WindowRef::Primary),
             ..default()
         },
@@ -52,13 +53,13 @@ fn check_if_hovering_over_tower(
 ) {
     let mut hover = query_hover.single_mut();
     for _event in hovered_events.read() {
-        if mouse_buttons.pressed(MouseButton::Left) == false {
+        if mouse_buttons.pressed(MouseButton::Middle) == false {
             hover.hovering = true
         }
     }
 
     for _event in unhovered_events.read() {
-        if mouse_buttons.pressed(MouseButton::Left) == false {
+        if mouse_buttons.pressed(MouseButton::Middle) == false {
             hover.hovering = false;
             println!("unhovered")
         } else {
@@ -67,7 +68,7 @@ fn check_if_hovering_over_tower(
         }
     }
 
-    if mouse_buttons.pressed(MouseButton::Left) == false && hover.locked == true {
+    if mouse_buttons.pressed(MouseButton::Middle) == false && hover.locked == true {
         hover.locked = false;
         println!("unlocked")
     }
@@ -98,7 +99,7 @@ fn pan_camera(
             hover = true
         }
     }
-    if mouse_buttons.pressed(MouseButton::Left) && hover == false{
+    if mouse_buttons.pressed(MouseButton::Middle) && hover == false{
         cursor_grab(primary_window);
         for event in mouse_event_reader.read() {
             let delta = event.delta;

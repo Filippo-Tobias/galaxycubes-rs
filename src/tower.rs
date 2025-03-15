@@ -1,6 +1,6 @@
 use bevy::{picking::{pointer::Location, prelude::*}, prelude::*};
 use crate::game_camera::GameCamera;
-
+use crate::drop_bar::{DroppableDropped, DroppableType};
 #[derive(Component)]
 pub struct Tower;
 
@@ -42,7 +42,7 @@ fn on_tower_dragged(event: Trigger<Pointer<Drag>>, mut ev_hovered: EventWriter<T
 impl Plugin for Tower{
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup);
-        app.add_systems(Update, move_cube);
+        app.add_systems(Update, (move_cube, spawn_cube_on_drop));
         app.add_event::<TowerHovered>();
         app.add_event::<TowerUnHovered>();
         app.add_event::<TowerDragged>();
@@ -133,3 +133,36 @@ fn move_cube (
         println!("{}", tower.translation);
     }
 }
+
+fn spawn_cube_on_drop(
+    mut commands: Commands,
+    mut ev_dropped: EventReader<DroppableDropped>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    asset_server: Res<AssetServer>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    for drop in ev_dropped.read() {
+        let shape_handle = 
+        meshes.add(Cuboid::default());
+        let texture_handle = asset_server.load("Player1.png");
+        let shape_material = materials.add(StandardMaterial {
+            base_color_texture: Some(texture_handle),
+            ..default()
+        });
+        if drop.droppable_type == DroppableType::Tower {
+            
+            commands.spawn((
+                Tower,
+                Mesh3d(shape_handle.clone()),
+                MeshMaterial3d(shape_material.clone()),
+                Transform::from_translation(drop.position)
+            ))
+            .observe(on_tower_hover)
+            .observe(on_tower_unhover)
+            .observe(on_tower_dragged);
+        }
+    }
+}
+            
+    
+    
