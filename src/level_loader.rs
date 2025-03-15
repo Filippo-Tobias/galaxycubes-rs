@@ -16,28 +16,25 @@ fn load_map(
 ) {
     //let spawn_positions =
     // ground plane
-    commands.spawn(PbrBundle {
-        mesh: meshes.add(Plane3d::default().mesh().size(50.0, 50.0)),
-        material: materials.add(Color::SILVER),
-        transform: Transform::from_xyz(
-            0.0,
-            -0.1,
-            -14.0,
-        ),
-        ..default()
-    });
+    commands.spawn((
+        Mesh3d(meshes.add(Plane3d::default().mesh().size(50.0, 50.0))),
+        MeshMaterial3d(materials.add(StandardMaterial {
+            base_color: Color::srgb(0.75, 0.75, 0.75), // silver-like color
+            ..default()
+        })),
+        Transform::from_xyz(0.0, -0.1, -14.0),
+    ));
 
     // light
-    commands.spawn(PointLightBundle {
-        point_light: PointLight {
+    commands.spawn((
+        PointLight {
             shadows_enabled: true,
             intensity: 10_000_000.,
             range: 1000.0,
             ..default()
         },
-        transform: Transform::from_xyz(8.0, 16.0, 8.0),
-        ..default()
-    });
+        Transform::from_xyz(8.0, 16.0, 8.0),
+    ));
 }
 
 fn make_map(
@@ -56,15 +53,14 @@ fn make_map(
     let mut position: DVec3 = spawn_positions.0;
     for _i in 0..tiles_x {
         for _j in 0..tiles_z{
-            commands.spawn(PbrBundle {
-                mesh: floor_tile_mesh.clone(),
-                material: materials.add(StandardMaterial {
-                    base_color: Color::rgb(0.2, 0.2, 0.2),
+            commands.spawn((
+                Mesh3d(floor_tile_mesh.clone()),
+                MeshMaterial3d(materials.add(StandardMaterial {
+                    base_color: Color::srgb(0.2, 0.2, 0.2),
                     ..Default::default()
-                }),
-                transform: Transform::from_xyz(position.x as f32, position.y as f32, position.z as f32),
-                ..Default::default()
-            });
+                })),
+                Transform::from_xyz(position.x as f32, position.y as f32, position.z as f32),
+            ));
             //println!("x: {}, y: {}, z: {}, i: {}, j: {}, tiles_x: {}", position.x, position.y, position.z, i, j, tiles_x);
             position.z += 1.2;
         }

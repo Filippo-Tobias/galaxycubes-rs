@@ -20,12 +20,10 @@ struct HoverState {
 
 fn setup(mut commands: Commands) {
     let mut camera_instance = commands.spawn((
-        Camera3dBundle {
-            transform: Transform::from_xyz(0.0, 10.0, 0.0).looking_at(Vec3::new(0.0, 0.0, -6.0), Vec3::Y),
-            camera: Camera {
-                target: RenderTarget::Window(WindowRef::Primary),
-                ..default()
-            },
+        Camera3d::default(),
+        Transform::from_xyz(0.0, 10.0, 0.0).looking_at(Vec3::new(0.0, 0.0, -6.0), Vec3::Y),
+        Camera {
+            target: RenderTarget::Window(WindowRef::Primary),
             ..default()
         },
         GameCamera,
@@ -124,15 +122,15 @@ fn cursor_grab(
     window: Mut<Window>,
 ) {
     let mut primary_window = window;
-    primary_window.cursor.grab_mode = CursorGrabMode::Confined;
-    primary_window.cursor.grab_mode = CursorGrabMode::Locked;
-    primary_window.cursor.visible = false;
+    primary_window.cursor_options.grab_mode = CursorGrabMode::Confined;
+    primary_window.cursor_options.grab_mode = CursorGrabMode::Locked;
+    primary_window.cursor_options.visible = false;
 }
 
 fn cursor_ungrab(
     window: Mut<Window>,
 ) {
     let mut primary_window = window;
-    primary_window.cursor.grab_mode = CursorGrabMode::None;
-    primary_window.cursor.visible = true;
+    primary_window.cursor_options.grab_mode = CursorGrabMode::None;
+    primary_window.cursor_options.visible = true;
 }

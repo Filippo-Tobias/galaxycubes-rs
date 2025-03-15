@@ -1,11 +1,9 @@
 use bevy::prelude::*;
-use bevy_editor_pls::*;
 mod tower;
 mod mini_editor;
 mod game_camera;
 mod level_loader;
 mod floor_tile_mesh;
-use bevy_mod_picking::prelude::*;
 use bevy::render::settings::Backends;
 use bevy::render::settings::WgpuSettings;
 use bevy::render::settings::RenderCreation;
@@ -22,17 +20,17 @@ fn main() {
             }),
             ..Default::default()
         }),
-        EditorPlugin::default(),
         bevy::diagnostic::FrameTimeDiagnosticsPlugin,
         bevy::diagnostic::EntityCountDiagnosticsPlugin,
         mini_editor::MiniEditor{editor_open: false},
         tower::Tower,
         game_camera::GameCamera,
         level_loader::LevelLoader,
-        DefaultPickingPlugins,
+        MeshPickingPlugin,
+        
         
     ))
-    .run()
+    .run();
 }
 
 

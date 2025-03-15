@@ -1,20 +1,17 @@
-use std::ptr::null;
-
-use bevy::prelude::*;
-use bevy_mod_picking::prelude::*;
-use pointer::Location;
-
+use bevy::{picking::{pointer::Location, prelude::*}, prelude::*};
 use crate::game_camera::GameCamera;
 
 #[derive(Component)]
 pub struct Tower;
 
 #[derive(Event)]
+#[allow(dead_code)]
 pub struct TowerHovered {
     pub entity: Entity,
     pub position: Location,
 }
 #[derive(Event)]
+#[allow(dead_code)]
 pub struct TowerUnHovered {
     pub entity: Entity,
     pub position: Location,
@@ -24,36 +21,23 @@ pub struct TowerDragged{
     pub entity: Entity,
 }
 
-#[derive(Component)]
-pub struct TowerMovement {
-    moving: bool
+fn on_tower_hover(event: Trigger<Pointer<Over>>, mut ev_hovered: EventWriter<TowerHovered>) {
+    println!("hovered");
+    ev_hovered.send(TowerHovered{entity: event.target, position: event.pointer_location.clone()});
 }
 
-impl From<ListenerInput<Pointer<Out>>> for TowerUnHovered {
-    fn from(input: ListenerInput<Pointer<Out>>) -> Self {
-        TowerUnHovered {
-            entity: input.target,
-            position: input.pointer_location.clone()
-        }
-    }
+fn on_tower_unhover(event: Trigger<Pointer<Out>>, mut ev_hovered: EventWriter<TowerUnHovered>) {
+    ev_hovered.send(TowerUnHovered{entity: event.target, position: event.pointer_location.clone()});
+    println!("unhovered")
+
 }
 
-impl From<ListenerInput<Pointer<Over>>> for TowerHovered {
-    fn from(input: ListenerInput<Pointer<Over>>) -> Self {
-        TowerHovered {
-            entity: input.target,
-            position: input.pointer_location.clone()
-        }
-    }
+fn on_tower_dragged(event: Trigger<Pointer<Drag>>, mut ev_hovered: EventWriter<TowerDragged>) {
+    ev_hovered.send(TowerDragged{entity: event.target});
+    println!("dragged")
+
 }
 
-impl From<ListenerInput<Pointer<Drag>>> for TowerDragged {
-    fn from(input: ListenerInput<Pointer<Drag>>) -> Self {
-        TowerDragged {
-            entity: input.target,
-        }
-    }
-}
 
 impl Plugin for Tower{
     fn build(&self, app: &mut App) {
@@ -71,7 +55,6 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    windows: Query<&Window>,
 ) {
     let texture_handle = asset_server.load("Player1.png");
 
@@ -83,10 +66,6 @@ fn setup(
 
     let shape_handle = 
         meshes.add(Cuboid::default());
-    let cos_pi_8 = (2.0 + (2.0_f32).sqrt()).sqrt() / 2.0;
-    let sin_pi_8 = (2.0 - (2.0_f32).sqrt()).sqrt() / 2.0;
-    let rotation_quat = Quat::from_xyzw(cos_pi_8, 0.0, 0.0, sin_pi_8);
-    let euler_angles: (f32, f32, f32) = rotation_quat.to_euler(EulerRot::YXZ);
     let tower_transform = Transform::from_xyz(
         0.0, 
         0.5, 
@@ -95,30 +74,27 @@ fn setup(
         5.0, 
         0.5, 
         -10.0);
+
     commands.spawn((
-        PbrBundle {
-            mesh: shape_handle.clone(),
-            material: shape_material.clone(),
-            transform: tower_transform,
-            ..default()
-        }, Tower,
-        On::<Pointer<Over>>::send_event::<TowerHovered>(),
-        On::<Pointer<Out>>::send_event::<TowerUnHovered>(),
-        On::<Pointer<Drag>>::send_event::<TowerDragged>(),
-    ));
-        
-    let mut tower = commands.spawn((
-        PbrBundle {
-            mesh: shape_handle.clone(),
-            material: shape_material.clone(),
-            transform: tower_transform2,
-            ..default()
-        }, Tower,
-        On::<Pointer<Over>>::send_event::<TowerHovered>(),
-        On::<Pointer<Out>>::send_event::<TowerUnHovered>(),
-        On::<Pointer<Drag>>::send_event::<TowerDragged>(),
-    ));
-    tower.insert(TowerMovement{moving: false}); 
+        Tower,
+        Mesh3d(shape_handle.clone()),
+        MeshMaterial3d(shape_material.clone()),
+        tower_transform
+    ))
+    .observe(on_tower_hover)
+    .observe(on_tower_unhover)
+    .observe(on_tower_dragged);
+
+    let tower_id = commands.spawn((
+        Tower,
+        Mesh3d(shape_handle.clone()),
+        MeshMaterial3d(shape_material.clone()),
+        tower_transform2
+    ))
+    .id();
+    commands.entity(tower_id).observe(on_tower_hover);
+    commands.entity(tower_id).observe(on_tower_unhover);
+    commands.entity(tower_id).observe(on_tower_dragged);
 } 
 
 fn move_cube (
@@ -139,10 +115,10 @@ fn move_cube (
         let Some(cursor_position) = windows.single().cursor_position() else {
             return;
         };
-        let Some(ray) = camera.viewport_to_world(camera_transform, cursor_position) else {
+        let Ok(ray) = camera.viewport_to_world(camera_transform, cursor_position) else {
             return;
         };
-        let Some(distance) = ray.intersect_plane(Vec3{x:0.0,y:0.0,z:0.0}, Plane3d::new(Vec3{x:0.0,y:1.0,z:0.0}))
+        let Some(distance) = ray.intersect_plane(Vec3{x:0.0,y:0.0,z:0.0}, InfinitePlane3d::new(Vec3{x:0.0,y:1.0,z:0.0}))
         else {
             return;
         };
