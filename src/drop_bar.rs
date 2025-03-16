@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
-pub struct DropBar;
+pub struct DropBarPlugin;
 
-impl  Plugin for DropBar {
+impl  Plugin for DropBarPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup);
         app.add_event::<DroppableDropped>();

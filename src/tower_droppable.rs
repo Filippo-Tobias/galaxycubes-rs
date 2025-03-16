@@ -2,14 +2,15 @@ use bevy::prelude::*;
 use crate::drop_bar::DroppableDropped;
 use crate::drop_bar::DroppableType;
 use crate::game_camera::GameCamera;
-pub struct TowerDroppable;
+use crate::tower_preview::TowerPreview;
+pub struct TowerDroppablePlugin;
 
 #[derive(Component)]
-pub struct TowerDroppableProperties {
+pub struct TowerDroppable {
     pub dragging: bool,
 }
 
-impl Plugin for TowerDroppable {
+impl Plugin for TowerDroppablePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup);
         app.add_systems(Update, check_if_dragging);
@@ -25,21 +26,22 @@ fn setup(
         Transform::from_xyz(-490.0, -440.0, 1.0).with_scale(Vec3::new(2.2, 2.2, 1.0)),
     )).id();
     commands.entity(tower_droppable_id).observe(on_dragged);
-    commands.entity(tower_droppable_id).insert(TowerDroppableProperties {
+    commands.entity(tower_droppable_id).insert(TowerDroppable {
         dragging: false,
     });
 }
 
 fn on_dragged(
     _dragged_events: Trigger<Pointer<Drag>>,
-    mut query: Query<&mut TowerDroppableProperties>,
+    mut query: Query<&mut TowerDroppable>,
+    mut commands: Commands,
 ) {
     query.single_mut().dragging = true;
 }
 
 fn check_if_dragging(
     windows: Query<&Window>,
-    mut query: Query<&mut TowerDroppableProperties>,
+    mut query: Query<&mut TowerDroppable>,
     buttons: Res<ButtonInput<MouseButton>>,
     mut ev_dropped: EventWriter<DroppableDropped>,
     camera_query: Query<&Camera, With<GameCamera>>,

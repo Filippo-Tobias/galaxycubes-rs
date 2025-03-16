@@ -1,8 +1,8 @@
 use bevy::{prelude::*, render::camera::RenderTarget, window::WindowRef};
 
-pub struct UICamera;
+pub struct UICameraPlugin;
 
-impl Plugin for UICamera {
+impl Plugin for UICameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup);
     }

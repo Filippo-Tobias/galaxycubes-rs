@@ -1,9 +1,9 @@
 use bevy::{math::DVec3, prelude::*};
 use crate::floor_tile_mesh;
 #[derive(Component)]
-pub struct LevelLoader;
+pub struct LevelLoaderPlugin;
 
-impl Plugin for LevelLoader {
+impl Plugin for LevelLoaderPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, (load_map, make_map));
     }

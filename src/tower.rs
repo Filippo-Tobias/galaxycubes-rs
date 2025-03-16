@@ -1,6 +1,20 @@
 use bevy::{picking::{pointer::Location, prelude::*}, prelude::*};
 use crate::game_camera::GameCamera;
 use crate::drop_bar::{DroppableDropped, DroppableType};
+
+pub struct TowerPlugin;
+
+impl Plugin for TowerPlugin{
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, setup);
+        app.add_systems(Update, (move_cube, spawn_cube_on_drop));
+        app.add_event::<TowerHovered>();
+        app.add_event::<TowerUnHovered>();
+        app.add_event::<TowerDragged>();
+    }
+}
+
+
 #[derive(Component)]
 pub struct Tower;
 
@@ -37,18 +51,6 @@ fn on_tower_dragged(event: Trigger<Pointer<Drag>>, mut ev_hovered: EventWriter<T
     println!("dragged")
 
 }
-
-
-impl Plugin for Tower{
-    fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup);
-        app.add_systems(Update, (move_cube, spawn_cube_on_drop));
-        app.add_event::<TowerHovered>();
-        app.add_event::<TowerUnHovered>();
-        app.add_event::<TowerDragged>();
-    }
-}
-
 
 fn setup(
     mut commands: Commands,
@@ -150,7 +152,6 @@ fn spawn_cube_on_drop(
             ..default()
         });
         if drop.droppable_type == DroppableType::Tower {
-            
             commands.spawn((
                 Tower,
                 Mesh3d(shape_handle.clone()),
