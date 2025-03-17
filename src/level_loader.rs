@@ -1,11 +1,16 @@
-use bevy::{math::DVec3, prelude::*};
+use bevy::{math::DVec3, prelude::*, utils::{hashbrown::HashMap, HashSet}};
 use crate::floor_tile_mesh;
 #[derive(Component)]
 pub struct LevelLoaderPlugin;
 
 impl Plugin for LevelLoaderPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, (load_map, make_map));
+        app.
+        add_systems(Startup, (load_map, make_map))
+        .insert_resource(Map {
+            tower_positions: HashMap::new(),
+        })
+        ;
     }
 }
 
@@ -55,4 +60,9 @@ fn make_map(
         position.z = spawn_positions.0.z;
         position.x += 1.2;
     }
+}
+
+#[derive(Resource)]
+pub struct Map {
+    tower_positions: HashMap<Vec2, Entity>,
 }

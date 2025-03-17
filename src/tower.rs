@@ -1,5 +1,5 @@
 use bevy::{picking::{pointer::Location, prelude::*}, prelude::*};
-use crate::game_camera::GameCamera;
+use crate::game_camera::{self, GameCamera};
 use crate::drop_bar::{DroppableDropped, DroppableType};
 
 pub struct TowerPlugin;
@@ -13,7 +13,6 @@ impl Plugin for TowerPlugin{
         app.add_event::<TowerDragged>();
     }
 }
-
 
 #[derive(Component)]
 pub struct Tower;
@@ -112,19 +111,7 @@ fn move_cube (
         dragging = true
     };
     if dragging == true{
-        let camera = camera_query.single();
-        let camera_transform = camera_transform_query.single();
-        let Some(cursor_position) = windows.single().cursor_position() else {
-            return;
-        };
-        let Ok(ray) = camera.viewport_to_world(camera_transform, cursor_position) else {
-            return;
-        };
-        let Some(distance) = ray.intersect_plane(Vec3{x:0.0,y:0.0,z:0.0}, InfinitePlane3d::new(Vec3{x:0.0,y:1.0,z:0.0}))
-        else {
-            return;
-        };
-        let point = ray.get_point(distance);
+        let point: Vec3 = game_camera::cursor_ray_to_plane(&windows, &camera_query, &camera_transform_query);
         let mut entity: Option<Entity> = None;
         for event in tower_dragged.read() {
             entity = Some(event.entity)

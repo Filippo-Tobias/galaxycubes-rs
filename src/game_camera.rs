@@ -2,15 +2,17 @@ use bevy::{input::mouse::{MouseMotion, MouseWheel}, prelude::*, render::camera::
 
 use crate::tower::{TowerHovered, TowerUnHovered};
 
-#[derive(Component)]
-pub struct GameCamera;
+pub struct GameCameraPlugin;
 
-impl Plugin for GameCamera {
+impl Plugin for GameCameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup);
         app.add_systems(Update, (pan_camera, check_if_hovering_over_tower));
     }
 }
+
+#[derive(Component)]
+pub struct GameCamera;
 
 #[derive(Component)]
 struct HoverState {
@@ -133,4 +135,26 @@ fn cursor_ungrab(
     let mut primary_window = window;
     primary_window.cursor_options.grab_mode = CursorGrabMode::None;
     primary_window.cursor_options.visible = true;
+}
+
+/// Returns the point on the plane where the cursor is pointing at.
+pub fn cursor_ray_to_plane(
+    windows: &Query<&Window>,
+    camera_query: &Query<&Camera, With<GameCamera>>,
+    camera_transform_query: &Query<&GlobalTransform, With<GameCamera>>,
+) -> Vec3 {
+    let camera = camera_query.single();
+    let camera_transform = camera_transform_query.single();
+    let Some(cursor_position) = windows.single().cursor_position() else {
+        return Vec3::ZERO;
+    };
+    let Ok(ray) = camera.viewport_to_world(camera_transform, cursor_position) else {
+        return Vec3::ZERO;
+    };
+    let Some(distance) = ray.intersect_plane(Vec3{x:0.0,y:0.0,z:0.0}, InfinitePlane3d::new(Vec3{x:0.0,y:1.0,z:0.0}))
+    else {
+        return Vec3::ZERO;
+    };
+    let point = ray.get_point(distance);
+    point
 }

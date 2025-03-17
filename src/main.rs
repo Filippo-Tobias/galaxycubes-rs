@@ -19,12 +19,13 @@ fn main() {
         EmbeddedAssetPlugin{mode: bevy_embedded_assets::PluginMode::ReplaceDefault},
         //mini_editor::MiniEditor{editor_open: false},
         tower::TowerPlugin,
-        game_camera::GameCamera,
+        game_camera::GameCameraPlugin,
         level_loader::LevelLoaderPlugin,
         MeshPickingPlugin,
         drop_bar::DropBarPlugin,
         ui_camera::UICameraPlugin,
         tower_droppable::TowerDroppablePlugin,
+        tower_preview::TowerPreviewPlugin,
         DefaultPlugins
         .set(WindowPlugin {
             primary_window: Some(Window {

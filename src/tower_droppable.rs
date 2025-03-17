@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use crate::drop_bar::DroppableDropped;
 use crate::drop_bar::DroppableType;
+use crate::game_camera;
 use crate::game_camera::GameCamera;
 use crate::tower_preview::TowerPreview;
 pub struct TowerDroppablePlugin;
@@ -34,8 +35,36 @@ fn setup(
 fn on_dragged(
     _dragged_events: Trigger<Pointer<Drag>>,
     mut query: Query<&mut TowerDroppable>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    asset_server: Res<AssetServer>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
     mut commands: Commands,
+    windows: Query<&Window>,
+    camera_query: Query<&Camera, With<GameCamera>>,
+    camera_transform_query: Query<&GlobalTransform, With<GameCamera>>,
 ) {
+    //Spawn a cube as a preview of the tower if the drag just started.
+    if query.single_mut().dragging == false {
+        let texture_handle = asset_server.load("Player1.png");
+        let shape_material = materials.add(StandardMaterial {
+            base_color_texture: Some(texture_handle),
+            base_color: Color::srgba(0.5, 0.5, 0.5, 0.25),
+            alpha_mode: AlphaMode::Blend,
+            ..default()
+        });
+        let mut tower_transform = game_camera::cursor_ray_to_plane(&windows, &camera_query, &camera_transform_query);
+        tower_transform.y = 0.5; // Fixed y position for the cube
+        let shape_handle = meshes.add(Cuboid::default());
+        commands.spawn((
+            Mesh3d(shape_handle.clone()),
+            MeshMaterial3d(shape_material.clone()),
+            Transform::from_translation(tower_transform),
+            TowerPreview{
+                droppable_type: DroppableType::Tower,
+            },
+        ));
+    }
+    // After the preview is spawned, set the dragging state to true.
     query.single_mut().dragging = true;
 }
 
@@ -49,19 +78,7 @@ fn check_if_dragging(
 ) {
     if buttons.just_released(MouseButton::Left) {
         let dragging = query.single_mut().dragging;
-        let camera = camera_query.single();
-        let camera_transform = camera_transform_query.single();
-        let Some(cursor_position) = windows.single().cursor_position() else {
-            return;
-        };
-        let Ok(ray) = camera.viewport_to_world(camera_transform, cursor_position) else {
-            return;
-        };
-        let Some(distance) = ray.intersect_plane(Vec3{x:0.0,y:0.0,z:0.0}, InfinitePlane3d::new(Vec3{x:0.0,y:1.0,z:0.0}))
-        else {
-            return;
-        };
-        let point = ray.get_point(distance);
+        let point = game_camera::cursor_ray_to_plane(&windows, &camera_query, &camera_transform_query);
         let x = (point.x / 1.2).round() * 1.2;
         let y = 0.5; // Fixed y position for the cube
         let z = (point.z / 1.2).round() * 1.2;
@@ -77,11 +94,11 @@ fn check_if_dragging(
             println!("not dropped");
         }
     }
-    for mut properties in query.iter_mut() {
-        if properties.dragging == false {
+    for mut tower_droppable in query.iter_mut() {
+        if tower_droppable.dragging == false {
             
         } else {
-            properties.dragging = true;
+            tower_droppable.dragging = true;
         }
     }
 }
