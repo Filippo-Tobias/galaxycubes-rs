@@ -34,21 +34,18 @@ pub struct TowerDragged{
     pub entity: Entity,
 }
 
-fn on_tower_hover(event: Trigger<Pointer<Over>>, mut ev_hovered: EventWriter<TowerHovered>) {
-    println!("hovered");
+fn on_tower_hover(event: Trigger<Pointer<Over>>, mut ev_hovered: EventWriter<TowerHovered>, mut res_locking_camera: ResMut<game_camera::LockingCamera>) {
     ev_hovered.send(TowerHovered{entity: event.target, position: event.pointer_location.clone()});
+    res_locking_camera.list.push(event.target);
 }
 
-fn on_tower_unhover(event: Trigger<Pointer<Out>>, mut ev_hovered: EventWriter<TowerUnHovered>) {
+fn on_tower_unhover(event: Trigger<Pointer<Out>>, mut ev_hovered: EventWriter<TowerUnHovered>, mut res_locking_camera: ResMut<game_camera::LockingCamera>) {
     ev_hovered.send(TowerUnHovered{entity: event.target, position: event.pointer_location.clone()});
-    println!("unhovered")
-
+    res_locking_camera.list.retain(|x| x != &event.target);
 }
 
 fn on_tower_dragged(event: Trigger<Pointer<Drag>>, mut ev_hovered: EventWriter<TowerDragged>) {
     ev_hovered.send(TowerDragged{entity: event.target});
-    println!("dragged")
-
 }
 
 fn setup(

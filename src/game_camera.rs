@@ -1,14 +1,20 @@
 use bevy::{input::mouse::{MouseMotion, MouseWheel}, prelude::*, render::camera::RenderTarget, window::{CursorGrabMode, PrimaryWindow, WindowRef}};
 
-use crate::tower::{TowerHovered, TowerUnHovered};
+//use crate::tower::{TowerHovered, TowerUnHovered};
 
 pub struct GameCameraPlugin;
 
 impl Plugin for GameCameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup);
-        app.add_systems(Update, (pan_camera, check_if_hovering_over_tower));
+        app.add_systems(Update, (pan_camera, check_if_camera_blocked));
+        app.insert_resource(LockingCamera{list: Vec::new()});
     }
+}
+
+#[derive(Resource)]
+pub struct LockingCamera{
+    pub list: Vec<Entity>
 }
 
 #[derive(Component)]
@@ -47,32 +53,32 @@ fn zoom_perspective(
     perspective.fov = perspective.fov.clamp(0.5, 1.0);
 }
 
-fn check_if_hovering_over_tower(
+fn check_if_camera_blocked(
     mut query_hover: Query<&mut HoverState, With<GameCamera>>,
-    mut hovered_events: EventReader<TowerHovered>,
-    mut unhovered_events: EventReader<TowerUnHovered>,
+    //mut hovered_events: EventReader<TowerHovered>,
+    //mut unhovered_events: EventReader<TowerUnHovered>,
     mouse_buttons: Res<ButtonInput<MouseButton>>,
+    locking_camera: Res<LockingCamera>,
+
 ) {
     let mut hover = query_hover.single_mut();
-    for _event in hovered_events.read() {
-        if mouse_buttons.pressed(MouseButton::Middle) == false {
-            hover.hovering = true
+    if locking_camera.list.len() > 0 {
+        if mouse_buttons.pressed(MouseButton::Left) == false {
+            hover.hovering = true;
+            println!("BLOCKING")
         }
     }
 
-    for _event in unhovered_events.read() {
-        if mouse_buttons.pressed(MouseButton::Middle) == false {
+    if locking_camera.list.len() == 0 {
+        if mouse_buttons.pressed(MouseButton::Left) == false {
             hover.hovering = false;
-            println!("unhovered")
         } else {
             hover.locked = true;
-            println!("locked")
         }
     }
 
-    if mouse_buttons.pressed(MouseButton::Middle) == false && hover.locked == true {
+    if mouse_buttons.pressed(MouseButton::Left) == false && hover.locked == true {
         hover.locked = false;
-        println!("unlocked")
     }
 }
 
@@ -101,7 +107,7 @@ fn pan_camera(
             hover = true
         }
     }
-    if mouse_buttons.pressed(MouseButton::Middle) && hover == false{
+    if mouse_buttons.pressed(MouseButton::Left) && hover == false{
         cursor_grab(primary_window);
         for event in mouse_event_reader.read() {
             let delta = event.delta;

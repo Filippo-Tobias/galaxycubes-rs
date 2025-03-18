@@ -42,6 +42,7 @@ fn on_dragged(
     windows: Query<&Window>,
     camera_query: Query<&Camera, With<GameCamera>>,
     camera_transform_query: Query<&GlobalTransform, With<GameCamera>>,
+    mut res_locking_camera: ResMut<game_camera::LockingCamera>,
 ) {
     //Spawn a cube as a preview of the tower if the drag just started.
     if query.single_mut().dragging == false {
@@ -55,14 +56,15 @@ fn on_dragged(
         let mut tower_transform = game_camera::cursor_ray_to_plane(&windows, &camera_query, &camera_transform_query);
         tower_transform.y = 0.5; // Fixed y position for the cube
         let shape_handle = meshes.add(Cuboid::default());
-        commands.spawn((
+        let tower_droppable_entity = commands.spawn((
             Mesh3d(shape_handle.clone()),
             MeshMaterial3d(shape_material.clone()),
             Transform::from_translation(tower_transform),
             TowerPreview{
                 droppable_type: DroppableType::Tower,
             },
-        ));
+        )).id();
+        res_locking_camera.list.push(tower_droppable_entity);
     }
     // After the preview is spawned, set the dragging state to true.
     query.single_mut().dragging = true;
@@ -75,9 +77,11 @@ fn check_if_dragging(
     mut ev_dropped: EventWriter<DroppableDropped>,
     camera_query: Query<&Camera, With<GameCamera>>,
     camera_transform_query: Query<&GlobalTransform, With<GameCamera>>,
+    mut res_locking_camera: ResMut<game_camera::LockingCamera>,
+    query_tower_preview_entity: Query<Entity, With<TowerPreview>>,
 ) {
+    let dragging = query.single_mut().dragging;
     if buttons.just_released(MouseButton::Left) {
-        let dragging = query.single_mut().dragging;
         let point = game_camera::cursor_ray_to_plane(&windows, &camera_query, &camera_transform_query);
         let x = (point.x / 1.2).round() * 1.2;
         let y = 0.5; // Fixed y position for the cube
@@ -91,10 +95,9 @@ fn check_if_dragging(
             });
         }
     }
-    for mut tower_droppable in query.iter_mut() {
-        if tower_droppable.dragging == false {
-        } else {
-            tower_droppable.dragging = true;
-        }
+    if dragging == true {
+        res_locking_camera.list.retain(|x| x != &query_tower_preview_entity.single());
+        //If I ever add another droppable this WILL CRASH THE GAME
     }
+    
 }
