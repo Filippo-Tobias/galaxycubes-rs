@@ -89,14 +89,10 @@ fn check_if_dragging(
                 droppable_type: DroppableType::Tower,
                 position: new_point,
             });
-            println!("dropped");
-        } else {
-            println!("not dropped");
         }
     }
     for mut tower_droppable in query.iter_mut() {
         if tower_droppable.dragging == false {
-            
         } else {
             tower_droppable.dragging = true;
         }

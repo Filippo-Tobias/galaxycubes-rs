@@ -1,13 +1,16 @@
 use bevy::prelude::*;
-mod tower;
+mod player_tower;
+mod enemy_pillar;
+use enemy_pillar::shooter_pillar;
+use player_tower::tower;
 mod mini_editor;
 mod game_camera;
 mod ui_camera;
 mod level_loader;
 mod floor_tile_mesh;
 mod drop_bar;
-mod tower_droppable;
-mod tower_preview;
+use player_tower::tower_droppable;
+use player_tower::tower_preview;
 use bevy::render::settings::Backends;
 use bevy::render::settings::WgpuSettings;
 use bevy::render::settings::RenderCreation;
@@ -26,6 +29,8 @@ fn main() {
         ui_camera::UICameraPlugin,
         tower_droppable::TowerDroppablePlugin,
         tower_preview::TowerPreviewPlugin,
+        shooter_pillar::ShooterPillarPlugin,
+
         DefaultPlugins
         .set(WindowPlugin {
             primary_window: Some(Window {

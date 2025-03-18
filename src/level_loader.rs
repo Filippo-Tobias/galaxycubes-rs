@@ -1,5 +1,13 @@
-use bevy::{math::DVec3, prelude::*, utils::{hashbrown::HashMap, HashSet}};
+use bevy::{math::DVec3, prelude::*, utils::hashbrown::HashMap};
 use crate::floor_tile_mesh;
+
+#[derive(Resource)]
+//Vec2 don't have a hash function, so we need to use integers instead.
+//The interger positions are then multiplied by 1.2 to get the real position.
+pub struct Map {
+    pub tower_positions: HashMap<(i32, i32), Entity>,
+}
+
 #[derive(Component)]
 pub struct LevelLoaderPlugin;
 
@@ -60,9 +68,4 @@ fn make_map(
         position.z = spawn_positions.0.z;
         position.x += 1.2;
     }
-}
-
-#[derive(Resource)]
-pub struct Map {
-    tower_positions: HashMap<Vec2, Entity>,
 }
