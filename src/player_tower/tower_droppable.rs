@@ -4,6 +4,7 @@ use crate::drop_bar::DroppableType;
 use crate::game_camera;
 use crate::game_camera::GameCamera;
 use crate::tower_preview::TowerPreview;
+
 pub struct TowerDroppablePlugin;
 
 #[derive(Component)]
@@ -96,8 +97,6 @@ fn check_if_dragging(
         }
     }
     if dragging == true {
-        res_locking_camera.list.retain(|x| x != &query_tower_preview_entity.single());
-        //If I ever add another droppable this WILL CRASH THE GAME
+        res_locking_camera.list.push(query_tower_preview_entity.single());
     }
-    
 }

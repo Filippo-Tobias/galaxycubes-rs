@@ -60,10 +60,14 @@ fn check_if_camera_blocked(
     mouse_buttons: Res<ButtonInput<MouseButton>>,
     locking_camera: Res<LockingCamera>,
 
+
 ) {
     let mut hover = query_hover.single_mut();
     if locking_camera.list.len() > 0 {
         println!("length > 0");
+        // for item in locking_camera.list.iter() {
+        //     println!("{}",item)
+        // }
 
         //if mouse_buttons.pressed(MouseButton::Left) == false {
             hover.hovering = true;
@@ -71,11 +75,11 @@ fn check_if_camera_blocked(
     }
 
     if locking_camera.list.len() == 0 {
-        if mouse_buttons.pressed(MouseButton::Left) == false {
+        //if mouse_buttons.pressed(MouseButton::Left) == false {
             hover.hovering = false;
-        } else {
-            hover.locked = true;
-        }
+        //} else {
+         //   hover.locked = true;
+        //}
     }
 
     if mouse_buttons.pressed(MouseButton::Left) == false && hover.locked == true {

@@ -34,11 +34,11 @@ pub struct TowerDragged{
     pub entity: Entity,
 }
 
-fn on_tower_hover(event: Trigger<Pointer<Over>>, mut ev_hovered: EventWriter<TowerHovered>, mut res_locking_camera: ResMut<game_camera::LockingCamera>) {
+fn on_tower_hover(event: Trigger<Pointer<Over>>, mut ev_hovered: EventWriter<TowerHovered>) {
     ev_hovered.send(TowerHovered{entity: event.target, position: event.pointer_location.clone()});
 }
 
-fn on_tower_unhover(event: Trigger<Pointer<Out>>, mut ev_hovered: EventWriter<TowerUnHovered>, mut res_locking_camera: ResMut<game_camera::LockingCamera>) {
+fn on_tower_unhover(event: Trigger<Pointer<Out>>, mut ev_hovered: EventWriter<TowerUnHovered>) {
     ev_hovered.send(TowerUnHovered{entity: event.target, position: event.pointer_location.clone()});
 }
 
@@ -111,12 +111,11 @@ fn move_cube (
     mut tower_dragged: EventReader<TowerDragged>,
     mut map: ResMut<Map>, // Resource containing tower positions
     mut res_locking_camera: ResMut<game_camera::LockingCamera>,
-    mut evr_hovered: EventReader<TowerHovered>, // Event reader for hovered towers
-
+    query_tower_entity: Query<Entity, With<Tower>>
 ) {
     let mut dragging = false;
     for _event in dragged_events.read() {
-        dragging = true
+        dragging = true;
     };
     if dragging == true{
         let point: Vec3 = game_camera::cursor_ray_to_plane(&windows, &camera_query, &camera_transform_query);
@@ -131,20 +130,9 @@ fn move_cube (
         map.tower_positions.insert(((transform_tower.translation.x / 1.2) as i32,(transform_tower.translation.z / 1.2) as i32), option_entity.unwrap());
         println!("{}", transform_tower.translation);
     } else { //if not dragging stop locking camera.
-        let mut option_tower_entity: Option<Entity> = None;
-        for tower in evr_hovered.read() {
-            option_tower_entity = Some(tower.entity);
+        for entity in query_tower_entity.iter(){
+            res_locking_camera.list.retain(|x| x != &entity);
         }
-        match option_tower_entity {
-            Some(entity) => {
-                res_locking_camera.list.retain(|x| x != &entity);
-                //if hovering entity unlock camera from it.
-            },
-            None => {} //Ignore if no tower is hovered.
-        }
-        
-        
-
     }
 }
 
