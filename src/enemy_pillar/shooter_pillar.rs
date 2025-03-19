@@ -34,13 +34,8 @@ fn setup(
     ))
     .id();
     map.tower_positions.insert(((new_pillar_transform.translation.x /1.2) as i32 , (new_pillar_transform.translation.z /1.2) as i32 ), new_pillar_entity);
-
-
-
-
 }
 
-
-
-
-
+fn shoot() {
+    
+}
