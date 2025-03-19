@@ -63,10 +63,11 @@ fn check_if_camera_blocked(
 ) {
     let mut hover = query_hover.single_mut();
     if locking_camera.list.len() > 0 {
-        if mouse_buttons.pressed(MouseButton::Left) == false {
+        println!("length > 0");
+
+        //if mouse_buttons.pressed(MouseButton::Left) == false {
             hover.hovering = true;
-            println!("BLOCKING")
-        }
+        //}
     }
 
     if locking_camera.list.len() == 0 {

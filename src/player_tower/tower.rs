@@ -36,16 +36,15 @@ pub struct TowerDragged{
 
 fn on_tower_hover(event: Trigger<Pointer<Over>>, mut ev_hovered: EventWriter<TowerHovered>, mut res_locking_camera: ResMut<game_camera::LockingCamera>) {
     ev_hovered.send(TowerHovered{entity: event.target, position: event.pointer_location.clone()});
-    res_locking_camera.list.push(event.target);
 }
 
 fn on_tower_unhover(event: Trigger<Pointer<Out>>, mut ev_hovered: EventWriter<TowerUnHovered>, mut res_locking_camera: ResMut<game_camera::LockingCamera>) {
     ev_hovered.send(TowerUnHovered{entity: event.target, position: event.pointer_location.clone()});
-    res_locking_camera.list.retain(|x| x != &event.target);
 }
 
-fn on_tower_dragged(event: Trigger<Pointer<Drag>>, mut ev_hovered: EventWriter<TowerDragged>) {
+fn on_tower_dragged(event: Trigger<Pointer<Drag>>, mut ev_hovered: EventWriter<TowerDragged>, mut res_locking_camera: ResMut<game_camera::LockingCamera>) {
     ev_hovered.send(TowerDragged{entity: event.target});
+    res_locking_camera.list.push(event.target);
 }
 
 fn setup(
@@ -111,6 +110,9 @@ fn move_cube (
     mut tower_query: Query<&mut Transform, With<Tower>>,
     mut tower_dragged: EventReader<TowerDragged>,
     mut map: ResMut<Map>, // Resource containing tower positions
+    mut res_locking_camera: ResMut<game_camera::LockingCamera>,
+    mut evr_hovered: EventReader<TowerHovered>, // Event reader for hovered towers
+
 ) {
     let mut dragging = false;
     for _event in dragged_events.read() {
@@ -122,12 +124,27 @@ fn move_cube (
         for event in tower_dragged.read() {
             option_entity = Some(event.entity)
         };
-        let mut tower: Mut<Transform> = tower_query.get_mut(option_entity.unwrap()).unwrap();
-        map.tower_positions.remove(&((tower.translation.x / 1.2) as i32,(tower.translation.z / 1.2) as i32));
-        tower.translation.x = (point.x / 1.2).round() * 1.2;
-        tower.translation.z = (point.z / 1.2).round() * 1.2;
-        map.tower_positions.insert(((tower.translation.x / 1.2) as i32,(tower.translation.z / 1.2) as i32), option_entity.unwrap());
-        println!("{}", tower.translation);
+        let mut transform_tower: Mut<Transform> = tower_query.get_mut(option_entity.unwrap()).unwrap();
+        map.tower_positions.remove(&((transform_tower.translation.x / 1.2) as i32,(transform_tower.translation.z / 1.2) as i32));
+        transform_tower.translation.x = (point.x / 1.2).round() * 1.2;
+        transform_tower.translation.z = (point.z / 1.2).round() * 1.2;
+        map.tower_positions.insert(((transform_tower.translation.x / 1.2) as i32,(transform_tower.translation.z / 1.2) as i32), option_entity.unwrap());
+        println!("{}", transform_tower.translation);
+    } else { //if not dragging stop locking camera.
+        let mut option_tower_entity: Option<Entity> = None;
+        for tower in evr_hovered.read() {
+            option_tower_entity = Some(tower.entity);
+        }
+        match option_tower_entity {
+            Some(entity) => {
+                res_locking_camera.list.retain(|x| x != &entity);
+                //if hovering entity unlock camera from it.
+            },
+            None => {} //Ignore if no tower is hovered.
+        }
+        
+        
+
     }
 }
 

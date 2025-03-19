@@ -28,7 +28,6 @@ fn move_preview(
 ) {
     let point: Vec3 = game_camera::cursor_ray_to_plane(&windows, &camera_query, &camera_transform_query);
     for tower_preview_entity in query_tower_preview_entity.iter_mut() {
-        println!("Entity found: {:?}", tower_preview_entity);
         let tower_preview: &TowerPreview = query_tower_preview.get(tower_preview_entity).unwrap();
         if tower_preview.droppable_type == DroppableType::Tower {
             query_tower_preview_transform.get_mut(tower_preview_entity).unwrap().translation.x = (point.x / 1.2).round() * 1.2;
