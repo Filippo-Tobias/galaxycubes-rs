@@ -7,14 +7,35 @@ pub struct GameCameraPlugin;
 impl Plugin for GameCameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup);
-        app.add_systems(Update, (pan_camera, check_if_camera_blocked));
-        app.insert_resource(LockingCamera{list: Vec::new()});
+        let camera_systems_set = IntoSystemSet::into_system_set(skip_next_frame);
+        app.add_systems(Update, (
+            pan_camera.run_if(camera_systems_set),
+            IntoSystem::into_system(reset_camera_skip).after(camera_systems_set),
+            
+
+            check_if_camera_blocked
+        ));
+        app.insert_resource(LockingCamera{list: Vec::new(), skipFrame: false});
     }
+}
+
+fn skip_next_frame(
+    res_locking_camera: Res<LockingCamera>,
+) -> bool {
+    return res_locking_camera.skipFrame;
+}
+
+fn reset_camera_skip(
+    mut res_locking_camera: ResMut<LockingCamera>,
+) {
+    res_locking_camera.skipFrame = false;
 }
 
 #[derive(Resource)]
 pub struct LockingCamera{
-    pub list: Vec<Entity>
+    pub list: Vec<Entity>,
+    pub skipFrame: bool,
+
 }
 
 #[derive(Component)]

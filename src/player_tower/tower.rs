@@ -111,7 +111,8 @@ fn move_cube (
     mut tower_dragged: EventReader<TowerDragged>,
     mut map: ResMut<Map>, // Resource containing tower positions
     mut res_locking_camera: ResMut<game_camera::LockingCamera>,
-    query_tower_entity: Query<Entity, With<Tower>>
+    query_tower_entity: Query<Entity, With<Tower>>,
+    mouse_buttons: Res<ButtonInput<MouseButton>>,
 ) {
     let mut dragging = false;
     for _event in dragged_events.read() {
@@ -129,7 +130,7 @@ fn move_cube (
         transform_tower.translation.z = (point.z / 1.2).round() * 1.2;
         map.tower_positions.insert(((transform_tower.translation.x / 1.2) as i32,(transform_tower.translation.z / 1.2) as i32), option_entity.unwrap());
         println!("{}", transform_tower.translation);
-    } else { //if not dragging stop locking camera.
+    } else if mouse_buttons.pressed(MouseButton::Left) == false { //if not dragging stop locking camera.
         for entity in query_tower_entity.iter(){
             res_locking_camera.list.retain(|x| x != &entity);
         }
