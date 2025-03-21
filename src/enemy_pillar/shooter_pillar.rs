@@ -1,7 +1,9 @@
+use std::thread::spawn;
+
 use bevy::prelude::*;
 
 use crate::level_loader::Map;
-
+use crate::enemy_pillar::bullet_mesh;
 pub struct ShooterPillarPlugin;
 impl Plugin for ShooterPillarPlugin {
     fn build(&self, app: &mut App) {
@@ -34,6 +36,24 @@ fn setup(
     ))
     .id();
     map.tower_positions.insert(((new_pillar_transform.translation.x /1.2) as i32 , (new_pillar_transform.translation.z /1.2) as i32 ), new_pillar_entity);
+    spawn_bullet(meshes, commands, materials);
+}
+
+fn spawn_bullet(
+    mut res_meshes: ResMut<Assets<Mesh>>,
+    mut commands: Commands,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    let bullet_mesh = bullet_mesh::create_bullet_mesh(&mut res_meshes);
+    let material_handle = materials.add(StandardMaterial {
+        base_color: Color::srgb(1., 1., 1.),
+        ..Default::default()
+    });
+    commands.spawn((
+        Mesh3d(bullet_mesh.clone()),
+        MeshMaterial3d(material_handle.clone()),
+        Transform::from_translation(Vec3{x: 0., y: 2., z: 0.}))
+    );
 }
 
 fn shoot() {

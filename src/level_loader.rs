@@ -18,7 +18,7 @@ impl Plugin for LevelLoaderPlugin {
         .insert_resource(Map {
             tower_positions: HashMap::new(),
         })
-        ;
+        .add_event::<MapDragged>();
     }
 }
 
@@ -61,11 +61,20 @@ fn make_map(
                 Mesh3d(floor_tile_mesh.clone()),
                 MeshMaterial3d(material_handle.clone()),
                 Transform::from_xyz(position.x as f32, position.y as f32, position.z as f32),
-            )); //Find way to declare bundle once and clone it inside the loop.
+            ))
+            .observe(on_map_drag)
+            ; //Find way to declare bundle once and clone it inside the loop.
             //println!("x: {}, y: {}, z: {}, i: {}, j: {}, tiles_x: {}", position.x, position.y, position.z, i, j, tiles_x);
             position.z += 1.2;
         }
         position.z = spawn_positions.0.z;
         position.x += 1.2;
     }
+}
+
+#[derive(Event)]
+pub struct MapDragged{}
+
+fn on_map_drag(_event: Trigger<Pointer<Drag>>, mut ev_hovered: EventWriter<MapDragged>) {
+    ev_hovered.send(MapDragged{});
 }

@@ -41,10 +41,10 @@ fn on_tower_hover(event: Trigger<Pointer<Over>>, mut ev_hovered: EventWriter<Tow
 fn on_tower_unhover(event: Trigger<Pointer<Out>>, mut ev_hovered: EventWriter<TowerUnHovered>) {
     ev_hovered.send(TowerUnHovered{entity: event.target, position: event.pointer_location.clone()});
 }
-
-fn on_tower_dragged(event: Trigger<Pointer<Drag>>, mut ev_hovered: EventWriter<TowerDragged>, mut res_locking_camera: ResMut<game_camera::LockingCamera>) {
+fn on_tower_dragged(event: Trigger<Pointer<Drag>>, mut ev_hovered: EventWriter<TowerDragged>) {
+// fn on_tower_dragged(event: Trigger<Pointer<Drag>>, mut ev_hovered: EventWriter<TowerDragged>, mut res_locking_camera: ResMut<game_camera::LockingCamera>) {
     ev_hovered.send(TowerDragged{entity: event.target});
-    res_locking_camera.list.push(event.target);
+    //res_locking_camera.list.push(event.target);
 }
 
 fn setup(
@@ -110,7 +110,7 @@ fn move_cube (
     mut tower_query: Query<&mut Transform, With<Tower>>,
     mut tower_dragged: EventReader<TowerDragged>,
     mut map: ResMut<Map>, // Resource containing tower positions
-    mut res_locking_camera: ResMut<game_camera::LockingCamera>,
+    //mut res_locking_camera: ResMut<game_camera::LockingCamera>,
     query_tower_entity: Query<Entity, With<Tower>>,
     mouse_buttons: Res<ButtonInput<MouseButton>>,
 ) {
@@ -131,9 +131,9 @@ fn move_cube (
         map.tower_positions.insert(((transform_tower.translation.x / 1.2) as i32,(transform_tower.translation.z / 1.2) as i32), option_entity.unwrap());
         println!("{}", transform_tower.translation);
     } else if mouse_buttons.pressed(MouseButton::Left) == false { //if not dragging stop locking camera.
-        for entity in query_tower_entity.iter(){
-            res_locking_camera.list.retain(|x| x != &entity);
-        }
+        // for entity in query_tower_entity.iter(){
+        //     res_locking_camera.list.retain(|x| x != &entity);
+        // }
     }
 }
 

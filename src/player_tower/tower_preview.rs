@@ -66,12 +66,12 @@ fn check_for_drop( //Check for drop event then delete the tower preview entity.
     mut ev_dropped: EventReader<DroppableDropped>,
     mut commands: Commands,
     mut query_tower_preview: Query<(Entity, &TowerPreview)>, // Query for TowerPreview entities
-    mut res_locking_camera: ResMut<game_camera::LockingCamera>,
+    //mut res_locking_camera: ResMut<game_camera::LockingCamera>,
 ) {
     for event in ev_dropped.read() {
         if event.droppable_type == DroppableType::Tower {
             for (entity, _tower_preview) in query_tower_preview.iter_mut() {
-                res_locking_camera.list.retain(|x| x != &entity);
+                //res_locking_camera.list.retain(|x| x != &entity);
                 commands.entity(entity).despawn(); // Despawn the TowerPreview entity
             }
         }

@@ -1,5 +1,7 @@
 use bevy::{input::mouse::{MouseMotion, MouseWheel}, prelude::*, render::camera::RenderTarget, window::{CursorGrabMode, PrimaryWindow, WindowRef}};
 
+use crate::level_loader::MapDragged;
+
 //use crate::tower::{TowerHovered, TowerUnHovered};
 
 pub struct GameCameraPlugin;
@@ -7,36 +9,42 @@ pub struct GameCameraPlugin;
 impl Plugin for GameCameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup);
-        let camera_systems_set = IntoSystemSet::into_system_set(skip_next_frame);
+        //let camera_systems_set = pan_camera;
         app.add_systems(Update, (
-            pan_camera.run_if(camera_systems_set),
-            IntoSystem::into_system(reset_camera_skip).after(camera_systems_set),
-            
-
+            //pan_camera.run_if(not(skip_next_frame)),
+            pan_camera,
+            //IntoSystem::into_system(reset_camera_skip).after(camera_systems_set),
             check_if_camera_blocked
         ));
-        app.insert_resource(LockingCamera{list: Vec::new(), skipFrame: false});
+        //app.insert_resource(LockingCamera{list: Vec::new()});
     }
 }
 
-fn skip_next_frame(
-    res_locking_camera: Res<LockingCamera>,
-) -> bool {
-    return res_locking_camera.skipFrame;
-}
+// #[derive(PartialEq)]
+// enum CameraPanState {
+//     IsPanning,
+//     NotPanning
+// }
 
-fn reset_camera_skip(
-    mut res_locking_camera: ResMut<LockingCamera>,
-) {
-    res_locking_camera.skipFrame = false;
-}
+// fn skip_next_frame(
+//     res_locking_camera: Res<LockingCamera>,
+// ) -> bool {
+//     return res_locking_camera.skipFrame;
+// }
 
-#[derive(Resource)]
-pub struct LockingCamera{
-    pub list: Vec<Entity>,
-    pub skipFrame: bool,
+// fn reset_camera_skip(
+//     mut res_locking_camera: ResMut<LockingCamera>,
+// ) {
+//     println!("{}", res_locking_camera.skipFrame);
+//     res_locking_camera.skipFrame = false;
+//     println!("{}", res_locking_camera.skipFrame);
 
-}
+// }
+
+// #[derive(Resource)]
+// pub struct LockingCamera{
+//     pub list: Vec<Entity>,
+// }
 
 #[derive(Component)]
 pub struct GameCamera;
@@ -79,29 +87,29 @@ fn check_if_camera_blocked(
     //mut hovered_events: EventReader<TowerHovered>,
     //mut unhovered_events: EventReader<TowerUnHovered>,
     mouse_buttons: Res<ButtonInput<MouseButton>>,
-    locking_camera: Res<LockingCamera>,
+    //locking_camera: Res<LockingCamera>,
 
 
 ) {
     let mut hover = query_hover.single_mut();
-    if locking_camera.list.len() > 0 {
-        println!("length > 0");
-        // for item in locking_camera.list.iter() {
-        //     println!("{}",item)
-        // }
+    // if locking_camera.list.len() > 0 {
+    //     println!("length > 0");
+    //     // for item in locking_camera.list.iter() {
+    //     //     println!("{}",item)
+    //     // }
 
-        //if mouse_buttons.pressed(MouseButton::Left) == false {
-            hover.hovering = true;
-        //}
-    }
+    //     //if mouse_buttons.pressed(MouseButton::Left) == false {
+    //         hover.hovering = true;
+    //     //}
+    // }
 
-    if locking_camera.list.len() == 0 {
-        //if mouse_buttons.pressed(MouseButton::Left) == false {
-            hover.hovering = false;
-        //} else {
-         //   hover.locked = true;
-        //}
-    }
+    // if locking_camera.list.len() == 0 {
+    //     //if mouse_buttons.pressed(MouseButton::Left) == false {
+    //         hover.hovering = false;
+    //     //} else {
+    //      //   hover.locked = true;
+    //     //}
+    // }
 
     if mouse_buttons.pressed(MouseButton::Left) == false && hover.locked == true {
         hover.locked = false;
@@ -116,11 +124,16 @@ fn pan_camera(
     mut mouse_event_reader: EventReader<MouseMotion>,
     mut mouse_wheel_events: EventReader<MouseWheel>,
     mouse_buttons: Res<ButtonInput<MouseButton>>,
+    mut evr_map_drag: EventReader<MapDragged>,
 ) {
+    let primary_window = query_windows.single_mut();
+    if evr_map_drag.read().peekable().peek().is_none() {
+        cursor_ungrab(primary_window);
+        return
+    }
     let hover_iter = query_hover.iter();
     let mut hover: bool = false;
     let mut transform = query_transform.single_mut();
-    let primary_window = query_windows.single_mut();
     let translation_multiplier: f32 = 0.005;
     let bounds = Vec3 { x: 8.0, y: 20.0, z: 8.0};
     let mut total_y_movement: f32 = 0.0;
@@ -146,8 +159,6 @@ fn pan_camera(
             transform.translation.x = transform.translation.x.clamp(-bounds.x, bounds.x);
             transform.translation.z = transform.translation.z.clamp(-bounds.z, bounds.z);
         }
-    } else {
-        cursor_ungrab(primary_window);
     }
 }
 
