@@ -6,20 +6,20 @@ pub fn create_bullet_mesh(meshes: &mut Assets<Mesh>) -> Handle<Mesh> {
     let indices = Indices::U32(vec![
         // Indices for each face of the cube
         
-        // Bottom face (0, 1, 2, 3)
-        0, 3, 1, 2, 3, 0, 
+        // // Bottom face (0, 1, 2, 3)
+        // 0, 3, 1, 2, 3, 0, 
 
         // Top face (4, 5, 6, 7)
         4, 7, 5, 6, 7, 4, 
 
         // Front face (8, 9, 10, 11)
-        8, 9, 10, 11, 10, 9,
+        8, 11, 9, 10, 11, 8,
 
-        // Back face (12, 13, 14, 15)
-        12, 13, 14, 15, 14, 13,
+        // // Back face (12, 13, 14, 15)
+        // 12, 13, 14, 15, 14, 13,
 
         // Left face (16, 17, 18, 19)
-        16, 17, 18, 19, 18, 17,
+        16, 18, 17, 17, 18, 19,
 
         // Right face (20, 21, 22, 23)
         20, 21, 22, 23, 22, 21

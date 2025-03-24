@@ -52,7 +52,7 @@ fn spawn_bullet(
     commands.spawn((
         Mesh3d(bullet_mesh.clone()),
         MeshMaterial3d(material_handle.clone()),
-        Transform::from_translation(Vec3{x: 0., y: 2., z: 0.}))
+        Transform::from_translation(Vec3{x: 10., y: 6., z: 0.}))
     );
 }
 

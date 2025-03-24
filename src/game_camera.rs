@@ -118,7 +118,6 @@ fn check_if_camera_blocked(
 
 fn pan_camera(
     mut query_transform: Query<&mut Transform, With<GameCamera>>,
-    query_hover: Query<&mut HoverState, With<GameCamera>>,
     query_camera_projection: Query<&mut Projection, With<GameCamera>>,
     mut query_windows: Query<&mut Window, With<PrimaryWindow>>,
     mut mouse_event_reader: EventReader<MouseMotion>,
@@ -126,13 +125,14 @@ fn pan_camera(
     mouse_buttons: Res<ButtonInput<MouseButton>>,
     mut evr_map_drag: EventReader<MapDragged>,
 ) {
-    let primary_window = query_windows.single_mut();
+    let mut primary_window = query_windows.single_mut();
     if evr_map_drag.read().peekable().peek().is_none() {
-        cursor_ungrab(primary_window);
+        if mouse_buttons.pressed(MouseButton::Left) == false {
+            //cursor_ungrab(&mut primary_window);
+        }
         return
     }
-    let hover_iter = query_hover.iter();
-    let mut hover: bool = false;
+
     let mut transform = query_transform.single_mut();
     let translation_multiplier: f32 = 0.005;
     let bounds = Vec3 { x: 8.0, y: 20.0, z: 8.0};
@@ -141,13 +141,9 @@ fn pan_camera(
         total_y_movement += e.y
     }
     zoom_perspective(query_camera_projection, 1.0 - total_y_movement*0.05);
-    for hover_state in hover_iter {
-        if hover_state.hovering == true {
-            hover = true
-        }
-    }
-    if mouse_buttons.pressed(MouseButton::Left) && hover == false{
-        cursor_grab(primary_window);
+
+    if mouse_buttons.pressed(MouseButton::Left) {
+        cursor_grab(&mut primary_window);
         for event in mouse_event_reader.read() {
             let delta = event.delta;
 
@@ -159,23 +155,24 @@ fn pan_camera(
             transform.translation.x = transform.translation.x.clamp(-bounds.x, bounds.x);
             transform.translation.z = transform.translation.z.clamp(-bounds.z, bounds.z);
         }
+    } else {
+
     }
 }
 
 
 fn cursor_grab(
-    window: Mut<Window>,
+    window: &mut Mut<Window>,
 ) {
-    let mut primary_window = window;
+    let primary_window = window;
     primary_window.cursor_options.grab_mode = CursorGrabMode::Confined;
-    primary_window.cursor_options.grab_mode = CursorGrabMode::Locked;
     primary_window.cursor_options.visible = false;
 }
 
 fn cursor_ungrab(
-    window: Mut<Window>,
+    window: &mut Mut<Window>,
 ) {
-    let mut primary_window = window;
+    let primary_window = window;
     primary_window.cursor_options.grab_mode = CursorGrabMode::None;
     primary_window.cursor_options.visible = true;
 }
