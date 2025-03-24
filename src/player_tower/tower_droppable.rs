@@ -57,14 +57,14 @@ fn on_dragged(
         let mut tower_transform = game_camera::cursor_ray_to_plane(&windows, &camera_query, &camera_transform_query);
         tower_transform.y = 0.5; // Fixed y position for the cube
         let shape_handle = meshes.add(Cuboid::default());
-        let tower_droppable_entity = commands.spawn((
+        commands.spawn((
             Mesh3d(shape_handle.clone()),
             MeshMaterial3d(shape_material.clone()),
             Transform::from_translation(tower_transform),
             TowerPreview{
                 droppable_type: DroppableType::Tower,
             },
-        )).id();
+        ));
         //res_locking_camera.list.push(tower_droppable_entity);
     }
     // After the preview is spawned, set the dragging state to true.
@@ -79,7 +79,6 @@ fn check_if_dragging(
     camera_query: Query<&Camera, With<GameCamera>>,
     camera_transform_query: Query<&GlobalTransform, With<GameCamera>>,
     //mut res_locking_camera: ResMut<game_camera::LockingCamera>,
-    query_tower_preview_entity: Query<Entity, With<TowerPreview>>,
 ) {
     let dragging = query.single_mut().dragging;
     if buttons.just_released(MouseButton::Left) {

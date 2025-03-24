@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 mod player_tower;
-mod enemy_pillar;
-use enemy_pillar::shooter_pillar;
+mod shooter_pillar;
 use player_tower::tower;
 mod mini_editor;
 mod game_camera;
@@ -29,7 +28,7 @@ fn main() {
         ui_camera::UICameraPlugin,
         tower_droppable::TowerDroppablePlugin,
         tower_preview::TowerPreviewPlugin,
-        shooter_pillar::ShooterPillarPlugin,
+        shooter_pillar::pillar::ShooterPillarPlugin,
 
         DefaultPlugins
         .set(WindowPlugin {

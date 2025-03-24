@@ -1,13 +1,13 @@
-use std::thread::spawn;
-
 use bevy::prelude::*;
 
 use crate::level_loader::Map;
-use crate::enemy_pillar::bullet_mesh;
+use crate::shooter_pillar::bullet_mesh;
+
 pub struct ShooterPillarPlugin;
 impl Plugin for ShooterPillarPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup);
+        app.add_systems(FixedUpdate, move_bullets);
     }
 }
 
@@ -52,10 +52,20 @@ fn spawn_bullet(
     commands.spawn((
         Mesh3d(bullet_mesh.clone()),
         MeshMaterial3d(material_handle.clone()),
-        Transform::from_translation(Vec3{x: 10., y: 6., z: 0.}))
-    );
+        Transform::from_translation(Vec3{x: 0., y: 6., z: 0.}),
+        ShooterPillarBullet{velocity: Vec3 { x: 0.01, y: 0., z: 0. }}
+    ));
 }
 
-fn shoot() {
-    
+#[derive(Component)]
+pub struct ShooterPillarBullet{
+    velocity: Vec3
+}
+
+fn move_bullets (
+    mut query_bullet: Query<(&mut Transform, &ShooterPillarBullet)>
+) {
+    for (mut bullet_transform, bullet) in query_bullet.iter_mut() {
+      bullet_transform.translation += bullet.velocity
+    };
 }

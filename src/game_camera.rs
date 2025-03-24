@@ -14,7 +14,6 @@ impl Plugin for GameCameraPlugin {
             //pan_camera.run_if(not(skip_next_frame)),
             pan_camera,
             //IntoSystem::into_system(reset_camera_skip).after(camera_systems_set),
-            check_if_camera_blocked
         ));
         //app.insert_resource(LockingCamera{list: Vec::new()});
     }
@@ -49,14 +48,8 @@ impl Plugin for GameCameraPlugin {
 #[derive(Component)]
 pub struct GameCamera;
 
-#[derive(Component)]
-struct HoverState {
-    hovering: bool,
-    locked: bool,
-}
-
 fn setup(mut commands: Commands) {
-    let mut camera_instance = commands.spawn((
+    commands.spawn((
         Camera3d::default(),
         Transform::from_xyz(0.0, 10.0, 0.0).looking_at(Vec3::new(0.0, 0.0, -6.0), Vec3::Y),
         Camera {
@@ -66,7 +59,6 @@ fn setup(mut commands: Commands) {
         },
         GameCamera,
     ));
-    camera_instance.insert(HoverState{hovering: false, locked: false});   
 }
 
 fn zoom_perspective(
@@ -82,40 +74,6 @@ fn zoom_perspective(
     perspective.fov = perspective.fov.clamp(0.5, 1.0);
 }
 
-fn check_if_camera_blocked(
-    mut query_hover: Query<&mut HoverState, With<GameCamera>>,
-    //mut hovered_events: EventReader<TowerHovered>,
-    //mut unhovered_events: EventReader<TowerUnHovered>,
-    mouse_buttons: Res<ButtonInput<MouseButton>>,
-    //locking_camera: Res<LockingCamera>,
-
-
-) {
-    let mut hover = query_hover.single_mut();
-    // if locking_camera.list.len() > 0 {
-    //     println!("length > 0");
-    //     // for item in locking_camera.list.iter() {
-    //     //     println!("{}",item)
-    //     // }
-
-    //     //if mouse_buttons.pressed(MouseButton::Left) == false {
-    //         hover.hovering = true;
-    //     //}
-    // }
-
-    // if locking_camera.list.len() == 0 {
-    //     //if mouse_buttons.pressed(MouseButton::Left) == false {
-    //         hover.hovering = false;
-    //     //} else {
-    //      //   hover.locked = true;
-    //     //}
-    // }
-
-    if mouse_buttons.pressed(MouseButton::Left) == false && hover.locked == true {
-        hover.locked = false;
-    }
-}
-
 fn pan_camera(
     mut query_transform: Query<&mut Transform, With<GameCamera>>,
     query_camera_projection: Query<&mut Projection, With<GameCamera>>,
@@ -128,7 +86,7 @@ fn pan_camera(
     let mut primary_window = query_windows.single_mut();
     if evr_map_drag.read().peekable().peek().is_none() {
         if mouse_buttons.pressed(MouseButton::Left) == false {
-            //cursor_ungrab(&mut primary_window);
+            cursor_ungrab(&mut primary_window);
         }
         return
     }

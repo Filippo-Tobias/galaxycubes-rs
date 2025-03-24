@@ -111,7 +111,6 @@ fn move_cube (
     mut tower_dragged: EventReader<TowerDragged>,
     mut map: ResMut<Map>, // Resource containing tower positions
     //mut res_locking_camera: ResMut<game_camera::LockingCamera>,
-    query_tower_entity: Query<Entity, With<Tower>>,
     mouse_buttons: Res<ButtonInput<MouseButton>>,
 ) {
     let mut dragging = false;
