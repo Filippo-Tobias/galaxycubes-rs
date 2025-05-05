@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 mod player_tower;
 mod shooter_pillar;
+mod game_systems;
+use game_systems::range_system;
 use player_tower::tower;
 mod mini_editor;
 mod game_camera;
@@ -29,6 +31,8 @@ fn main() {
         tower_droppable::TowerDroppablePlugin,
         tower_preview::TowerPreviewPlugin,
         shooter_pillar::pillar::ShooterPillarPlugin,
+        range_system::RangeSystemPlugin,
+
 
         DefaultPlugins
         .set(WindowPlugin {
@@ -41,7 +45,7 @@ fn main() {
         .set(ImagePlugin::default_nearest())
         .set(RenderPlugin {
             render_creation: RenderCreation::Automatic(WgpuSettings {
-                backends: {Some(Backends::BROWSER_WEBGPU); Some(Backends::VULKAN)},
+                backends: {Some(Backends::VULKAN)},
                 ..Default::default()
             }),
             ..Default::default()

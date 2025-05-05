@@ -33,6 +33,7 @@ fn setup(
     });
 }
 
+#[allow(clippy::too_many_arguments)]
 fn on_dragged(
     _dragged_events: Trigger<Pointer<Drag>>,
     mut query: Query<&mut TowerDroppable>,
@@ -46,7 +47,7 @@ fn on_dragged(
     //mut res_locking_camera: ResMut<game_camera::LockingCamera>,
 ) {
     //Spawn a cube as a preview of the tower if the drag just started.
-    if query.single_mut().dragging == false {
+    if !query.single_mut().dragging {
         let texture_handle = asset_server.load("Player1.png");
         let shape_material = materials.add(StandardMaterial {
             base_color_texture: Some(texture_handle),
@@ -87,7 +88,7 @@ fn check_if_dragging(
         let y = 0.5; // Fixed y position for the cube
         let z = (point.z / 1.2).round() * 1.2;
         let new_point = Vec3::new(x, y, z);
-        if dragging == true {
+        if dragging {
             query.single_mut().dragging = false;
             ev_dropped.send(DroppableDropped {
                 droppable_type: DroppableType::Tower,

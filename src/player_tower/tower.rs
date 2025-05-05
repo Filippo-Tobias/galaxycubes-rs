@@ -1,5 +1,5 @@
 use bevy::{picking::{pointer::Location, prelude::*}, prelude::*};
-use crate::{game_camera::{self, GameCamera}, level_loader::Map};
+use crate::{game_camera::{self, GameCamera}, game_systems::range_system::DirtyPosition, level_loader::Map};
 use crate::drop_bar::{DroppableDropped, DroppableType};
 
 pub struct TowerPlugin;
@@ -42,7 +42,7 @@ fn on_tower_unhover(event: Trigger<Pointer<Out>>, mut ev_hovered: EventWriter<To
     ev_hovered.send(TowerUnHovered{entity: event.target, position: event.pointer_location.clone()});
 }
 fn on_tower_dragged(event: Trigger<Pointer<Drag>>, mut ev_hovered: EventWriter<TowerDragged>) {
-// fn on_tower_dragged(event: Trigger<Pointer<Drag>>, mut ev_hovered: EventWriter<TowerDragged>, mut res_locking_camera: ResMut<game_camera::LockingCamera>) {
+    // fn on_tower_dragged(event: Trigger<Pointer<Drag>>, mut ev_hovered: EventWriter<TowerDragged>, mut res_locking_camera: ResMut<game_camera::LockingCamera>) {
     ev_hovered.send(TowerDragged{entity: event.target});
     //res_locking_camera.list.push(event.target);
 }
@@ -98,26 +98,30 @@ fn setup(
     commands.entity(new_tower_entity).observe(on_tower_unhover);
     commands.entity(new_tower_entity).observe(on_tower_dragged);
     map.tower_positions.insert(((tower_transform2.translation.x / 1.2) as i32 , (tower_transform2.translation.z / 1.2) as i32), new_tower_entity);
-
-    
 } 
 
+#[allow(clippy::too_many_arguments)]
 fn move_cube (
     windows: Query<&Window>,
     mut dragged_events: EventReader<TowerDragged>,
+    mut commands: Commands,
     camera_query: Query<&Camera, With<GameCamera>>,
     camera_transform_query: Query<&GlobalTransform, With<GameCamera>>,
     mut tower_query: Query<&mut Transform, With<Tower>>,
+    query_dirty_position: Query<&DirtyPosition>,
     mut tower_dragged: EventReader<TowerDragged>,
     mut map: ResMut<Map>, // Resource containing tower positions
     //mut res_locking_camera: ResMut<game_camera::LockingCamera>,
     mouse_buttons: Res<ButtonInput<MouseButton>>,
 ) {
     let mut dragging = false;
-    for _event in dragged_events.read() {
+    for event in dragged_events.read() {
         dragging = true;
+        if !query_dirty_position.contains(event.entity) {
+            commands.entity(event.entity).insert(DirtyPosition);
+        }
     };
-    if dragging == true{
+    if dragging {
         let point: Vec3 = game_camera::cursor_ray_to_plane(&windows, &camera_query, &camera_transform_query);
         let mut option_entity: Option<Entity> = None;
         for event in tower_dragged.read() {
@@ -128,14 +132,15 @@ fn move_cube (
         transform_tower.translation.x = (point.x / 1.2).round() * 1.2;
         transform_tower.translation.z = (point.z / 1.2).round() * 1.2;
         map.tower_positions.insert(((transform_tower.translation.x / 1.2) as i32,(transform_tower.translation.z / 1.2) as i32), option_entity.unwrap());
-        println!("{}", transform_tower.translation);
-    } else if mouse_buttons.pressed(MouseButton::Left) == false { //if not dragging stop locking camera.
+        //println!("{}", transform_tower.translation);
+    } else if !mouse_buttons.pressed(MouseButton::Left) { //if not dragging stop locking camera.
         // for entity in query_tower_entity.iter(){
         //     res_locking_camera.list.retain(|x| x != &entity);
         // }
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn spawn_cube_on_drop(
     mut commands: Commands,
     mut ev_dropped: EventReader<DroppableDropped>,
@@ -155,7 +160,7 @@ fn spawn_cube_on_drop(
             ..default()
         });
         let point = game_camera::cursor_ray_to_plane(&query_window, &query_camera, &query_camera_transform);
-        if drop.droppable_type == DroppableType::Tower && map.tower_positions.contains_key(&((point.x / 1.2).round() as i32, (point.z / 1.2).round() as i32)) == false {
+        if drop.droppable_type == DroppableType::Tower && !map.tower_positions.contains_key(&((point.x / 1.2).round() as i32, (point.z / 1.2).round() as i32)) {
             {
             let new_tower_entity = commands.spawn((
                 Tower,

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::game_systems::range_system::RangeArea;
 use crate::level_loader::Map;
 use crate::shooter_pillar::bullet_mesh;
 
@@ -28,7 +29,9 @@ fn setup(
     });
     let shape_handle = meshes.add(Cuboid::default());
     let new_pillar_transform= Transform::from_xyz(1.2, 0.5, 1.2);
+    let second_pillar_transform= Transform::from_xyz(2.4, 0.5, 1.2);
     let new_pillar_entity = commands.spawn((
+        RangeArea{range: (-4..=5,-4..=5), entities: vec![]},
         ShooterPillar,
         Mesh3d(shape_handle.clone()),
         MeshMaterial3d(shape_material.clone()),
@@ -36,6 +39,15 @@ fn setup(
     ))
     .id();
     map.tower_positions.insert(((new_pillar_transform.translation.x /1.2) as i32 , (new_pillar_transform.translation.z /1.2) as i32 ), new_pillar_entity);
+    let second_pillar_entity = commands.spawn((
+        RangeArea{range: (-4..=5,-4..=5), entities: vec![]},
+        ShooterPillar,
+        Mesh3d(shape_handle.clone()),
+        MeshMaterial3d(shape_material.clone()),
+        second_pillar_transform,
+    ))
+    .id();
+    map.tower_positions.insert(((second_pillar_transform.translation.x /1.2) as i32 , (second_pillar_transform.translation.z /1.2) as i32 ), second_pillar_entity);
     spawn_bullet(meshes, commands, materials);
 }
 

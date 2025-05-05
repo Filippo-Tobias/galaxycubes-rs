@@ -12,7 +12,7 @@ fn setup(
     mut commands: Commands
 ) {
     commands.spawn((
-        Camera2d::default(),
+        Camera2d,
         Camera {
             order: 1,
             target: RenderTarget::Window(WindowRef::Primary),

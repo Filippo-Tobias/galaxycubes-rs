@@ -83,22 +83,30 @@ fn pan_camera(
     mouse_buttons: Res<ButtonInput<MouseButton>>,
     mut evr_map_drag: EventReader<MapDragged>,
 ) {
-    let mut primary_window = query_windows.single_mut();
-    if evr_map_drag.read().peekable().peek().is_none() {
-        if mouse_buttons.pressed(MouseButton::Left) == false {
-            cursor_ungrab(&mut primary_window);
-        }
-        return
-    }
-
     let mut transform = query_transform.single_mut();
     let translation_multiplier: f32 = 0.005;
     let bounds = Vec3 { x: 8.0, y: 20.0, z: 8.0};
     let mut total_y_movement: f32 = 0.0;
-    for e in mouse_wheel_events.read() {
-        total_y_movement += e.y
+    for ev in mouse_wheel_events.read() {
+        match ev.unit {
+            bevy::input::mouse::MouseScrollUnit::Line => {
+                println!("line")
+            }
+            bevy::input::mouse::MouseScrollUnit::Pixel => {
+                println!("pixel")
+            }
+        }
+        total_y_movement += ev.y
     }
     zoom_perspective(query_camera_projection, 1.0 - total_y_movement*0.05);
+
+    let mut primary_window = query_windows.single_mut();
+    if evr_map_drag.read().peekable().peek().is_none() {
+        if !mouse_buttons.pressed(MouseButton::Left) {
+            cursor_ungrab(&mut primary_window);
+        }
+        return
+    }
 
     if mouse_buttons.pressed(MouseButton::Left) {
         cursor_grab(&mut primary_window);
@@ -113,8 +121,6 @@ fn pan_camera(
             transform.translation.x = transform.translation.x.clamp(-bounds.x, bounds.x);
             transform.translation.z = transform.translation.z.clamp(-bounds.z, bounds.z);
         }
-    } else {
-
     }
 }
 
@@ -153,6 +159,5 @@ pub fn cursor_ray_to_plane(
     else {
         return Vec3::ZERO;
     };
-    let point = ray.get_point(distance);
-    point
+    ray.get_point(distance)
 }
