@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 pub struct DropBarPlugin;
 
-impl  Plugin for DropBarPlugin {
+impl Plugin for DropBarPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup);
         app.add_event::<DroppableDropped>();
@@ -30,5 +30,4 @@ fn setup(
         Sprite::from_image(asset_server.load("drop_bar.png")),
         transform,
     ));
-    
 }

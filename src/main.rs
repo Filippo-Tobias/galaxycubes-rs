@@ -30,7 +30,7 @@ fn main() {
         ui_camera::UICameraPlugin,
         tower_droppable::TowerDroppablePlugin,
         tower_preview::TowerPreviewPlugin,
-        shooter_pillar::pillar::ShooterPillarPlugin,
+        shooter_pillar::plugin::ShooterPillarPlugin,
         range_system::plugin::RangeSystemPlugin,
         attack_timer::plugin::AttackTimerPlugin,
 

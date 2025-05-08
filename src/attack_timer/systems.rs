@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-
+use super::components::AttackTimer;
 pub fn tick_timers(
     mut query_attack_timers: Query<&mut AttackTimer>,
     time: Res<Time>

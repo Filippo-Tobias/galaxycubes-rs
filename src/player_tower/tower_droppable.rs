@@ -44,7 +44,6 @@ fn on_dragged(
     windows: Query<&Window>,
     camera_query: Query<&Camera, With<GameCamera>>,
     camera_transform_query: Query<&GlobalTransform, With<GameCamera>>,
-    //mut res_locking_camera: ResMut<game_camera::LockingCamera>,
 ) {
     //Spawn a cube as a preview of the tower if the drag just started.
     if !query.single_mut().dragging {
@@ -66,7 +65,6 @@ fn on_dragged(
                 droppable_type: DroppableType::Tower,
             },
         ));
-        //res_locking_camera.list.push(tower_droppable_entity);
     }
     // After the preview is spawned, set the dragging state to true.
     query.single_mut().dragging = true;
@@ -79,7 +77,6 @@ fn check_if_dragging(
     mut ev_dropped: EventWriter<DroppableDropped>,
     camera_query: Query<&Camera, With<GameCamera>>,
     camera_transform_query: Query<&GlobalTransform, With<GameCamera>>,
-    //mut res_locking_camera: ResMut<game_camera::LockingCamera>,
 ) {
     let dragging = query.single_mut().dragging;
     if buttons.just_released(MouseButton::Left) {
@@ -96,7 +93,4 @@ fn check_if_dragging(
             });
         }
     }
-    // if dragging == true {
-    //     res_locking_camera.list.push(query_tower_preview_entity.single());
-    // }
 }
