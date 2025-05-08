@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
-use crate::game_systems::range_system::RangeArea;
+use crate::attack_timer;
+use crate::range_system::components::RangeArea;
 use crate::level_loader::Map;
 use crate::shooter_pillar::bullet_mesh;
 
@@ -38,6 +39,7 @@ fn setup(
         new_pillar_transform,
     ))
     .id();
+    commands.entity(new_pillar_entity).insert(attack_timer::components::AttackTimer::new(Timer::from_seconds(10.0, TimerMode::Repeating)));
     map.tower_positions.insert(((new_pillar_transform.translation.x /1.2) as i32 , (new_pillar_transform.translation.z /1.2) as i32 ), new_pillar_entity);
     let second_pillar_entity = commands.spawn((
         RangeArea{range: (-4..=5,-4..=5), entities: vec![]},
@@ -49,6 +51,12 @@ fn setup(
     .id();
     map.tower_positions.insert(((second_pillar_transform.translation.x /1.2) as i32 , (second_pillar_transform.translation.z /1.2) as i32 ), second_pillar_entity);
     spawn_bullet(meshes, commands, materials);
+}
+
+fn check_timers(
+    query: Query<attack_timer::components::&AttackTimer, With<ShooterPillar>>
+){
+
 }
 
 fn spawn_bullet(

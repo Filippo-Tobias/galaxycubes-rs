@@ -1,28 +1,11 @@
-use std::ops::RangeInclusive;
-
+use super::components;
 use bevy::prelude::*;
 
-pub struct RangeSystemPlugin;
 
-impl Plugin for RangeSystemPlugin {
-    fn build(&self, app: &mut App) {
-       app.add_systems(Update, check_ranges); 
-    }
-}
-#[derive(Component)]
-
-pub struct RangeArea{
-    pub range: (RangeInclusive<i32>, RangeInclusive<i32>),
-    pub entities: Vec<Entity>
-}
-
-#[derive(Component)]
-pub struct DirtyPosition;
-
-fn check_ranges(
+pub fn check_ranges(
     mut commands: Commands,
-    query_entity_transform: Query<(Entity, &Transform), With<DirtyPosition>>,
-    mut query_range_areas: Query<&mut RangeArea>,
+    query_entity_transform: Query<(Entity, &Transform), With<components::DirtyPosition>>,
+    mut query_range_areas: Query<&mut components::RangeArea>,
 ){
     for (entity, transform) in query_entity_transform.iter() {
         let mut flag_remove_dirty = false;
@@ -40,7 +23,7 @@ fn check_ranges(
             }
         }
         if flag_remove_dirty {
-            commands.entity(entity).remove::<DirtyPosition>();
+            commands.entity(entity).remove::<components::DirtyPosition>();
         }
     } 
 }
