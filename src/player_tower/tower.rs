@@ -1,6 +1,6 @@
 use bevy::{picking::{pointer::Location, prelude::*}, prelude::*};
-use crate::{game_camera::{self, GameCamera}, range_system::components::DirtyPosition, level_loader::Map};
-use crate::drop_bar::{DroppableDropped, DroppableType};
+use crate::{game_camera::components::GameCamera, range_system::components::DirtyPosition, level_loader::Map};
+use crate::drag_and_drop::components::{DroppableDropped, DroppableType};
 
 pub struct TowerPlugin;
 

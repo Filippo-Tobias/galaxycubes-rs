@@ -1,36 +1,32 @@
 use bevy::prelude::*;
-use crate::drop_bar::DroppableDropped;
-use crate::drop_bar::DroppableType;
-use crate::game_camera;
-use crate::game_camera::GameCamera;
+use crate::drag_and_drop::components::{DroppableDropped, DroppableType};
+use crate::game_camera::components::GameCamera;
+use crate::game_camera::systems::cursor_ray_to_plane;
 use crate::tower_preview::TowerPreview;
+use super::components::TowerDroppable;
 
-pub struct TowerDroppablePlugin;
-
-#[derive(Component)]
-pub struct TowerDroppable {
-    pub dragging: bool,
-}
-
-impl Plugin for TowerDroppablePlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup);
-        app.add_systems(Update, check_if_dragging);
-    }
-}
-
-fn setup(
+pub fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
 ) {
+    //let mut transform = Transform::from_xyz(-490.0, -440.0, -1.0);
+    let mut transform = Transform::from_xyz(-100.0, -250.0, -1.0);
+    transform.scale=Vec3{x: 0.6, y: 0.6, z: 1.0};
+    commands.spawn((
+        Sprite::from_image(asset_server.load("drop_bar.png")),
+        transform,
+        println!("dropped bar")
+    ));
     let tower_droppable_id = commands.spawn((
         Sprite::from_image(asset_server.load("Player1.png")),
-        Transform::from_xyz(-490.0, -440.0, 1.0).with_scale(Vec3::new(2.2, 2.2, 1.0)),
+        //Transform::from_xyz(-490.0, -440.0, 1.0).with_scale(Vec3::new(2.2, 2.2, 1.0)),
+        Transform::from_xyz(-450.0, -250.0, 1.0).with_scale(Vec3::new(2.2, 2.2, 1.0)),
     )).id();
     commands.entity(tower_droppable_id).observe(on_dragged);
     commands.entity(tower_droppable_id).insert(TowerDroppable {
         dragging: false,
     });
+    println!("spawned droppable");
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -54,7 +50,7 @@ fn on_dragged(
             alpha_mode: AlphaMode::Blend,
             ..default()
         });
-        let mut tower_transform = game_camera::cursor_ray_to_plane(&windows, &camera_query, &camera_transform_query);
+        let mut tower_transform = cursor_ray_to_plane(&windows, &camera_query, &camera_transform_query);
         tower_transform.y = 0.5; // Fixed y position for the cube
         let shape_handle = meshes.add(Cuboid::default());
         commands.spawn((
@@ -70,7 +66,7 @@ fn on_dragged(
     query.single_mut().dragging = true;
 }
 
-fn check_if_dragging(
+pub fn check_if_dragging(
     windows: Query<&Window>,
     mut query: Query<&mut TowerDroppable>,
     buttons: Res<ButtonInput<MouseButton>>,
@@ -80,7 +76,7 @@ fn check_if_dragging(
 ) {
     let dragging = query.single_mut().dragging;
     if buttons.just_released(MouseButton::Left) {
-        let point = game_camera::cursor_ray_to_plane(&windows, &camera_query, &camera_transform_query);
+        let point = cursor_ray_to_plane(&windows, &camera_query, &camera_transform_query);
         let x = (point.x / 1.2).round() * 1.2;
         let y = 0.5; // Fixed y position for the cube
         let z = (point.z / 1.2).round() * 1.2;

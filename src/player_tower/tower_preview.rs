@@ -1,6 +1,6 @@
-use crate::{drop_bar::DroppableDropped, game_camera::{self, GameCamera}, level_loader::Map};
+use crate::{drag_and_drop::components::DroppableDropped, game_camera::{self, GameCamera}, level_loader::Map};
 use bevy::prelude::*;
-use crate::drop_bar::DroppableType;
+use crate::drag_and_drop::components::DroppableType;
 
 pub struct TowerPreviewPlugin;
 
