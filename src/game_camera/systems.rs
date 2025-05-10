@@ -1,54 +1,11 @@
-use bevy::{input::mouse::{MouseMotion, MouseWheel}, prelude::*, render::camera::RenderTarget, window::{CursorGrabMode, PrimaryWindow, WindowRef}};
+use bevy::prelude::*;
 
+use bevy::render::camera::ScalingMode;
+use bevy::{input::mouse::{MouseMotion, MouseWheel}, render::camera::RenderTarget, window::{CursorGrabMode, PrimaryWindow, WindowRef}};
+use super::components::GameCamera;
 use crate::level_loader::MapDragged;
-
-//use crate::tower::{TowerHovered, TowerUnHovered};
-
-pub struct GameCameraPlugin;
-
-impl Plugin for GameCameraPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup);
-        //let camera_systems_set = pan_camera;
-        app.add_systems(Update, (
-            //pan_camera.run_if(not(skip_next_frame)),
-            pan_camera,
-            //IntoSystem::into_system(reset_camera_skip).after(camera_systems_set),
-        ));
-        //app.insert_resource(LockingCamera{list: Vec::new()});
-    }
-}
-
-// #[derive(PartialEq)]
-// enum CameraPanState {
-//     IsPanning,
-//     NotPanning
-// }
-
-// fn skip_next_frame(
-//     res_locking_camera: Res<LockingCamera>,
-// ) -> bool {
-//     return res_locking_camera.skipFrame;
-// }
-
-// fn reset_camera_skip(
-//     mut res_locking_camera: ResMut<LockingCamera>,
-// ) {
-//     println!("{}", res_locking_camera.skipFrame);
-//     res_locking_camera.skipFrame = false;
-//     println!("{}", res_locking_camera.skipFrame);
-
-// }
-
-// #[derive(Resource)]
-// pub struct LockingCamera{
-//     pub list: Vec<Entity>,
-// }
-
-#[derive(Component)]
-pub struct GameCamera;
-
-fn setup(mut commands: Commands) {
+ // GameCamera
+pub fn setup_game_camera(mut commands: Commands) {
     commands.spawn((
         Camera3d::default(),
         Transform::from_xyz(0.0, 10.0, 0.0).looking_at(Vec3::new(0.0, 0.0, -6.0), Vec3::Y),
@@ -74,7 +31,7 @@ fn zoom_perspective(
     perspective.fov = perspective.fov.clamp(0.5, 1.0);
 }
 
-fn pan_camera(
+pub fn pan_camera(
     mut query_transform: Query<&mut Transform, With<GameCamera>>,
     query_camera_projection: Query<&mut Projection, With<GameCamera>>,
     mut query_windows: Query<&mut Window, With<PrimaryWindow>>,
@@ -160,4 +117,28 @@ pub fn cursor_ray_to_plane(
         return Vec3::ZERO;
     };
     ray.get_point(distance)
+}
+
+//UI Camera
+
+pub fn setup_ui_camera(
+    mut commands: Commands
+) {
+    let camera2d = (
+        Camera2d,
+        Camera {
+            order: 1,
+            target: RenderTarget::Window(WindowRef::Primary),
+            ..default()
+        },
+        Transform::from_xyz(0.0, 0.0, 0.0),
+        GlobalTransform::default(),
+        IsDefaultUiCamera,
+        OrthographicProjection{
+            scaling_mode: ScalingMode::Fixed { width: 1920.0 , height: 1080.0 }, 
+            ..OrthographicProjection::default_2d()
+        }
+    );
+
+    commands.spawn(camera2d);
 }

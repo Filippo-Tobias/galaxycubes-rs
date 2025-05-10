@@ -1,21 +1,13 @@
 use bevy::prelude::*;
 
-use crate::game_systems::range_system::RangeArea;
+use super::components::*;
+
+use crate::attack_timer::components::AttackTimer;
+use crate::range_system::components::RangeArea;
 use crate::level_loader::Map;
 use crate::shooter_pillar::bullet_mesh;
 
-pub struct ShooterPillarPlugin;
-impl Plugin for ShooterPillarPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup);
-        app.add_systems(FixedUpdate, move_bullets);
-    }
-}
-
-#[derive(Component)]
-pub struct ShooterPillar;
-
-fn setup(
+pub fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     asset_server: Res<AssetServer>,
@@ -38,6 +30,7 @@ fn setup(
         new_pillar_transform,
     ))
     .id();
+    commands.entity(new_pillar_entity).insert(AttackTimer::new(Timer::from_seconds(10.0, TimerMode::Repeating)));
     map.tower_positions.insert(((new_pillar_transform.translation.x /1.2) as i32 , (new_pillar_transform.translation.z /1.2) as i32 ), new_pillar_entity);
     let second_pillar_entity = commands.spawn((
         RangeArea{range: (-4..=5,-4..=5), entities: vec![]},
@@ -48,15 +41,28 @@ fn setup(
     ))
     .id();
     map.tower_positions.insert(((second_pillar_transform.translation.x /1.2) as i32 , (second_pillar_transform.translation.z /1.2) as i32 ), second_pillar_entity);
-    spawn_bullet(meshes, commands, materials);
+    spawn_bullet(&mut meshes, &mut commands, &mut materials);
 }
 
-fn spawn_bullet(
+pub fn check_timers(
+    query_attack_timer: Query<&AttackTimer, With<ShooterPillar>>,
     mut res_meshes: ResMut<Assets<Mesh>>,
     mut commands: Commands,
     mut materials: ResMut<Assets<StandardMaterial>>,
+){
+    for attack_timer in query_attack_timer.iter() {
+        if attack_timer.0.finished() {
+            spawn_bullet(&mut res_meshes, &mut commands, &mut materials);
+        }
+    }
+}
+
+fn spawn_bullet(
+    res_meshes: &mut ResMut<Assets<Mesh>>,
+    commands: &mut Commands,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
 ) {
-    let bullet_mesh = bullet_mesh::create_bullet_mesh(&mut res_meshes);
+    let bullet_mesh = bullet_mesh::create_bullet_mesh(res_meshes);
     let material_handle = materials.add(StandardMaterial {
         base_color: Color::srgb(1., 1., 1.),
         ..Default::default()
@@ -69,12 +75,7 @@ fn spawn_bullet(
     ));
 }
 
-#[derive(Component)]
-pub struct ShooterPillarBullet{
-    velocity: Vec3
-}
-
-fn move_bullets (
+pub fn move_bullets (
     mut query_bullet: Query<(&mut Transform, &ShooterPillarBullet)>
 ) {
     for (mut bullet_transform, bullet) in query_bullet.iter_mut() {

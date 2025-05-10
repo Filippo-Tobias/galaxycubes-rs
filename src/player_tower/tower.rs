@@ -1,7 +1,7 @@
 use bevy::{picking::{pointer::Location, prelude::*}, prelude::*};
-use crate::{game_camera::{self, GameCamera}, game_systems::range_system::DirtyPosition, level_loader::Map};
-use crate::drop_bar::{DroppableDropped, DroppableType};
-
+use crate::{game_camera::components::GameCamera, range_system::components::DirtyPosition, level_loader::Map};
+use crate::drag_and_drop::components::{DroppableDropped, DroppableType};
+use crate::game_camera;
 pub struct TowerPlugin;
 
 impl Plugin for TowerPlugin{
@@ -122,7 +122,7 @@ fn move_cube (
         }
     };
     if dragging {
-        let point: Vec3 = game_camera::cursor_ray_to_plane(&windows, &camera_query, &camera_transform_query);
+        let point: Vec3 = game_camera::systems::cursor_ray_to_plane(&windows, &camera_query, &camera_transform_query);
         let mut option_entity: Option<Entity> = None;
         for event in tower_dragged.read() {
             option_entity = Some(event.entity)
@@ -159,7 +159,7 @@ fn spawn_cube_on_drop(
             base_color_texture: Some(texture_handle),
             ..default()
         });
-        let point = game_camera::cursor_ray_to_plane(&query_window, &query_camera, &query_camera_transform);
+        let point = game_camera::systems::cursor_ray_to_plane(&query_window, &query_camera, &query_camera_transform);
         if drop.droppable_type == DroppableType::Tower && !map.tower_positions.contains_key(&((point.x / 1.2).round() as i32, (point.z / 1.2).round() as i32)) {
             {
             let new_tower_entity = commands.spawn((

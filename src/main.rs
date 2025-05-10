@@ -1,17 +1,14 @@
 use bevy::prelude::*;
 mod player_tower;
 mod shooter_pillar;
-mod game_systems;
-use game_systems::range_system;
+mod range_system;
+mod attack_timer;
 use player_tower::tower;
 mod mini_editor;
 mod game_camera;
-mod ui_camera;
 mod level_loader;
 mod floor_tile_mesh;
-mod drop_bar;
-use player_tower::tower_droppable;
-use player_tower::tower_preview;
+mod drag_and_drop;
 use bevy::render::settings::Backends;
 use bevy::render::settings::WgpuSettings;
 use bevy::render::settings::RenderCreation;
@@ -23,15 +20,15 @@ fn main() {
         EmbeddedAssetPlugin{mode: bevy_embedded_assets::PluginMode::ReplaceDefault},
         //mini_editor::MiniEditor{editor_open: false},
         tower::TowerPlugin,
-        game_camera::GameCameraPlugin,
+        game_camera::plugins::GameCameraPlugin,
         level_loader::LevelLoaderPlugin,
         MeshPickingPlugin,
-        drop_bar::DropBarPlugin,
-        ui_camera::UICameraPlugin,
-        tower_droppable::TowerDroppablePlugin,
-        tower_preview::TowerPreviewPlugin,
-        shooter_pillar::pillar::ShooterPillarPlugin,
-        range_system::RangeSystemPlugin,
+        game_camera::plugins::UICameraPlugin,
+        drag_and_drop::plugins::TowerPreviewPlugin,
+        shooter_pillar::plugins::ShooterPillarPlugin,
+        range_system::plugins::RangeSystemPlugin,
+        attack_timer::plugins::AttackTimerPlugin,
+        drag_and_drop::plugins::DragAndDrop,
 
 
         DefaultPlugins
