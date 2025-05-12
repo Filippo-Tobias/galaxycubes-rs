@@ -41,18 +41,19 @@ pub fn setup(
     ))
     .id();
     map.tower_positions.insert(((second_pillar_transform.translation.x /1.2) as i32 , (second_pillar_transform.translation.z /1.2) as i32 ), second_pillar_entity);
-    spawn_bullet(&mut meshes, &mut commands, &mut materials);
 }
 
 pub fn check_timers(
-    query_attack_timer: Query<&AttackTimer, With<ShooterPillar>>,
+    attack_timer_and_transform_q: Query<(&AttackTimer, &Transform), With<ShooterPillar>>,
     mut res_meshes: ResMut<Assets<Mesh>>,
     mut commands: Commands,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ){
-    for attack_timer in query_attack_timer.iter() {
+    for attack_timer_and_transform in attack_timer_and_transform_q.iter() {
+        let attack_timer = attack_timer_and_transform.0;
+        let transform = attack_timer_and_transform.1;
         if attack_timer.0.finished() {
-            spawn_bullet(&mut res_meshes, &mut commands, &mut materials);
+            spawn_bullet(&mut res_meshes, &mut commands, &mut materials, transform.translation);
         }
     }
 }
@@ -61,6 +62,7 @@ fn spawn_bullet(
     res_meshes: &mut ResMut<Assets<Mesh>>,
     commands: &mut Commands,
     materials: &mut ResMut<Assets<StandardMaterial>>,
+    position: Vec3,
 ) {
     let bullet_mesh = bullet_mesh::create_bullet_mesh(res_meshes);
     let material_handle = materials.add(StandardMaterial {
@@ -70,7 +72,7 @@ fn spawn_bullet(
     commands.spawn((
         Mesh3d(bullet_mesh.clone()),
         MeshMaterial3d(material_handle.clone()),
-        Transform::from_translation(Vec3{x: 0., y: 6., z: 0.}),
+        Transform::from_translation(position),
         ShooterPillarBullet{velocity: Vec3 { x: 0.01, y: 0., z: 0. }}
     ));
 }
