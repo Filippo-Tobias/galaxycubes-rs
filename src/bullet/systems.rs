@@ -3,7 +3,7 @@ use crate::shooter_pillar::components::ShooterPillar;
 use crate::attack::components::{Attack, AttackTimer, AttackType};
 use super::bullet_mesh;
 use super::components::{Bullet, BulletData, BulletType};
-
+use crate::level_loader::Map;
 fn spawn_bullet(
     res_meshes: &mut ResMut<Assets<Mesh>>,
     commands: &mut Commands,
@@ -59,11 +59,18 @@ pub fn check_timers(
 pub fn move_bullets (
     mut query_bullet: Query<(&mut Transform, &Bullet, Entity)>,
     mut commands: Commands,
+    map: Res<Map>,
 ) {
     for (mut bullet_transform, bullet, bullet_entity) in query_bullet.iter_mut() {
         if bullet_transform.translation.distance(bullet.bullet_origin) > bullet.bullet_data.range * 1.2 {
             commands.entity(bullet_entity).despawn();
-        }
-        bullet_transform.translation += bullet.velocity
+        };
+        let pos_to_map_coord = bullet_transform.translation / Vec3::new(1.2, 1.2, 1.2);
+        if map.tower_positions.contains_key(&(pos_to_map_coord.x.round() as i32, pos_to_map_coord.z.round() as i32)) && bullet_transform.translation.distance(bullet.bullet_origin) > 1.2 {
+            commands.entity(bullet_entity).despawn();
+        } else {
+            println!("{} {}", pos_to_map_coord.x.round() as i32, pos_to_map_coord.z.round() as i32);
+        };
+        bullet_transform.translation += bullet.velocity;
     };
 }

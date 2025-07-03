@@ -33,13 +33,4 @@ pub fn setup(
     .id();
     commands.entity(new_pillar_entity).insert(AttackTimer::new(Timer::from_seconds(2.0, TimerMode::Repeating)));
     map.tower_positions.insert(((new_pillar_transform.translation.x /1.2) as i32 , (new_pillar_transform.translation.z /1.2) as i32 ), new_pillar_entity);
-    let second_pillar_entity = commands.spawn((
-        RangeArea{range: (-4..=5,-4..=5), entities: vec![]},
-        ShooterPillar,
-        Mesh3d(shape_handle.clone()),
-        MeshMaterial3d(shape_material.clone()),
-        second_pillar_transform,
-    ))
-    .id();
-    map.tower_positions.insert(((second_pillar_transform.translation.x /1.2) as i32 , (second_pillar_transform.translation.z /1.2) as i32 ), second_pillar_entity);
 }

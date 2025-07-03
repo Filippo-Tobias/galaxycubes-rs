@@ -162,17 +162,17 @@ fn spawn_cube_on_drop(
         let point = game_camera::systems::cursor_ray_to_plane(&query_window, &query_camera, &query_camera_transform);
         if drop.droppable_type == DroppableType::Tower && !map.tower_positions.contains_key(&((point.x / 1.2).round() as i32, (point.z / 1.2).round() as i32)) {
             {
-            let new_tower_entity = commands.spawn((
-                Tower,
-                Mesh3d(shape_handle.clone()),
-                MeshMaterial3d(shape_material.clone()),
-                Transform::from_translation(drop.position)
-            ))
-            .observe(on_tower_hover)
-            .observe(on_tower_unhover)
-            .observe(on_tower_dragged)
-            .id();
-            map.tower_positions.insert(((drop.position.x / 1.2) as i32 , (drop.position.z / 1.2) as i32), new_tower_entity);
+                let new_tower_entity = commands.spawn((
+                    Tower,
+                    Mesh3d(shape_handle.clone()),
+                    MeshMaterial3d(shape_material.clone()),
+                    Transform::from_translation(drop.position)
+                ))
+                .observe(on_tower_hover)
+                .observe(on_tower_unhover)
+                .observe(on_tower_dragged)
+                .id();
+                map.tower_positions.insert(((drop.position.x / 1.2) as i32 , (drop.position.z / 1.2) as i32), new_tower_entity);
             }
         }
     }
