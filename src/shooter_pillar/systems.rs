@@ -27,11 +27,11 @@ pub fn setup(
         ShooterPillar,
         Mesh3d(shape_handle.clone()),
         MeshMaterial3d(shape_material.clone()),
-        Attack{attack_type: AttackType::Bullet { bullet_type: BulletType::ShooterPillar }},
+        Attack{attack_type: AttackType::Bullet { bullet_type: BulletType::ShooterPillar}},
         new_pillar_transform,
     ))
     .id();
-    commands.entity(new_pillar_entity).insert(AttackTimer::new(Timer::from_seconds(10.0, TimerMode::Repeating)));
+    commands.entity(new_pillar_entity).insert(AttackTimer::new(Timer::from_seconds(2.0, TimerMode::Repeating)));
     map.tower_positions.insert(((new_pillar_transform.translation.x /1.2) as i32 , (new_pillar_transform.translation.z /1.2) as i32 ), new_pillar_entity);
     let second_pillar_entity = commands.spawn((
         RangeArea{range: (-4..=5,-4..=5), entities: vec![]},

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use crate::shooter_pillar::components::ShooterPillar;
 use crate::attack::components::{Attack, AttackTimer, AttackType};
 use super::bullet_mesh;
-use super::components::{Bullet, BulletType};
+use super::components::{Bullet, BulletData, BulletType};
 
 fn spawn_bullet(
     res_meshes: &mut ResMut<Assets<Mesh>>,
@@ -10,6 +10,7 @@ fn spawn_bullet(
     materials: &mut ResMut<Assets<StandardMaterial>>,
     position: Vec3,
     bullet_type: BulletType,
+    bullet_data: BulletData,
 ) {
     let material_handle: Handle<StandardMaterial>;
     let bullet_mesh: Handle<Mesh>; 
@@ -28,7 +29,7 @@ fn spawn_bullet(
         Mesh3d(bullet_mesh.clone()),
         MeshMaterial3d(material_handle.clone()),
         Transform::from_translation(position),
-        Bullet{bullet_type: BulletType::ShooterPillar, velocity}
+        Bullet{bullet_type, velocity, bullet_data, bullet_origin: position}
     ));
 }
 
@@ -46,7 +47,7 @@ pub fn check_timers(
                 AttackType::Bullet { bullet_type } => {
                     match bullet_type {
                         BulletType::ShooterPillar =>{
-                            spawn_bullet(&mut res_meshes, &mut commands, &mut materials, transform.translation, BulletType::ShooterPillar);
+                            spawn_bullet(&mut res_meshes, &mut commands, &mut materials, transform.translation, BulletType::ShooterPillar, BulletData::shooter_pillar_default());
                         }
                     }
                 }
@@ -56,9 +57,13 @@ pub fn check_timers(
 }
 
 pub fn move_bullets (
-    mut query_bullet: Query<(&mut Transform, &Bullet)>
+    mut query_bullet: Query<(&mut Transform, &Bullet, Entity)>,
+    mut commands: Commands,
 ) {
-    for (mut bullet_transform, bullet) in query_bullet.iter_mut() {
-      bullet_transform.translation += bullet.velocity
+    for (mut bullet_transform, bullet, bullet_entity) in query_bullet.iter_mut() {
+        if bullet_transform.translation.distance(bullet.bullet_origin) > bullet.bullet_data.range * 1.2 {
+            commands.entity(bullet_entity).despawn();
+        }
+        bullet_transform.translation += bullet.velocity
     };
 }
