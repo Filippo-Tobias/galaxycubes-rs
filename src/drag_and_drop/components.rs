@@ -6,7 +6,7 @@ pub struct DroppableDropped {
     pub position: Vec3,
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Eq)]
 pub enum DroppableType {
     Tower,
 }

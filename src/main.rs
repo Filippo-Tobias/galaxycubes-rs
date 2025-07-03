@@ -1,8 +1,9 @@
 use bevy::prelude::*;
 mod player_tower;
+mod bullet;
 mod shooter_pillar;
 mod range_system;
-mod attack_timer;
+mod attack;
 use player_tower::tower;
 mod mini_editor;
 mod game_camera;
@@ -27,8 +28,9 @@ fn main() {
         drag_and_drop::plugins::TowerPreviewPlugin,
         shooter_pillar::plugins::ShooterPillarPlugin,
         range_system::plugins::RangeSystemPlugin,
-        attack_timer::plugins::AttackTimerPlugin,
+        attack::plugins::AttackPlugin,
         drag_and_drop::plugins::DragAndDrop,
+        bullet::plugins::BulletPlugin, 
 
 
         DefaultPlugins

@@ -2,10 +2,9 @@ use bevy::prelude::*;
 
 use super::components::*;
 
-use crate::attack_timer::components::AttackTimer;
+use crate::attack::components::{Attack, AttackTimer, AttackType};
 use crate::range_system::components::RangeArea;
 use crate::level_loader::Map;
-use crate::shooter_pillar::bullet_mesh;
 
 pub fn setup(
     mut commands: Commands,
@@ -27,6 +26,7 @@ pub fn setup(
         ShooterPillar,
         Mesh3d(shape_handle.clone()),
         MeshMaterial3d(shape_material.clone()),
+        Attack{attack_type: AttackType::Bullet},
         new_pillar_transform,
     ))
     .id();
@@ -41,46 +41,4 @@ pub fn setup(
     ))
     .id();
     map.tower_positions.insert(((second_pillar_transform.translation.x /1.2) as i32 , (second_pillar_transform.translation.z /1.2) as i32 ), second_pillar_entity);
-}
-
-pub fn check_timers(
-    attack_timer_and_transform_q: Query<(&AttackTimer, &Transform), With<ShooterPillar>>,
-    mut res_meshes: ResMut<Assets<Mesh>>,
-    mut commands: Commands,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-){
-    for attack_timer_and_transform in attack_timer_and_transform_q.iter() {
-        let attack_timer = attack_timer_and_transform.0;
-        let transform = attack_timer_and_transform.1;
-        if attack_timer.0.finished() {
-            spawn_bullet(&mut res_meshes, &mut commands, &mut materials, transform.translation);
-        }
-    }
-}
-
-fn spawn_bullet(
-    res_meshes: &mut ResMut<Assets<Mesh>>,
-    commands: &mut Commands,
-    materials: &mut ResMut<Assets<StandardMaterial>>,
-    position: Vec3,
-) {
-    let bullet_mesh = bullet_mesh::create_bullet_mesh(res_meshes);
-    let material_handle = materials.add(StandardMaterial {
-        base_color: Color::srgb(1., 1., 1.),
-        ..Default::default()
-    });
-    commands.spawn((
-        Mesh3d(bullet_mesh.clone()),
-        MeshMaterial3d(material_handle.clone()),
-        Transform::from_translation(position),
-        ShooterPillarBullet{velocity: Vec3 { x: 0.01, y: 0., z: 0. }}
-    ));
-}
-
-pub fn move_bullets (
-    mut query_bullet: Query<(&mut Transform, &ShooterPillarBullet)>
-) {
-    for (mut bullet_transform, bullet) in query_bullet.iter_mut() {
-      bullet_transform.translation += bullet.velocity
-    };
 }
