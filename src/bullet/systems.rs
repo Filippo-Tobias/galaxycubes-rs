@@ -41,8 +41,16 @@ pub fn check_timers(
     for components in query_components.iter() {
         let attack_timer = components.0;
         let transform = components.1;
-        if attack_timer.0.finished() && components.2.attack_type == AttackType::Bullet {
-            spawn_bullet(&mut res_meshes, &mut commands, &mut materials, transform.translation, BulletType::ShooterPillar);
+        if attack_timer.0.finished() {
+            match &components.2.attack_type {
+                AttackType::Bullet { bullet_type } => {
+                    match bullet_type {
+                        BulletType::ShooterPillar =>{
+                            spawn_bullet(&mut res_meshes, &mut commands, &mut materials, transform.translation, BulletType::ShooterPillar);
+                        }
+                    }
+                }
+            };
         }
     }
 }

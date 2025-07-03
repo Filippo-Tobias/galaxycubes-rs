@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use super::components::*;
 
 use crate::attack::components::{Attack, AttackTimer, AttackType};
+use crate::bullet::components::BulletType;
 use crate::range_system::components::RangeArea;
 use crate::level_loader::Map;
 
@@ -26,7 +27,7 @@ pub fn setup(
         ShooterPillar,
         Mesh3d(shape_handle.clone()),
         MeshMaterial3d(shape_material.clone()),
-        Attack{attack_type: AttackType::Bullet},
+        Attack{attack_type: AttackType::Bullet { bullet_type: BulletType::ShooterPillar }},
         new_pillar_transform,
     ))
     .id();

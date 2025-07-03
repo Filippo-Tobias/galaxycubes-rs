@@ -1,8 +1,10 @@
 use bevy::prelude::*;
-
+use crate::bullet::components::BulletType;
 #[derive(PartialEq, Eq)]
 pub enum AttackType{
-    Bullet,
+    Bullet{
+        bullet_type: BulletType,
+    },
 }
 
 #[derive(Component)]
