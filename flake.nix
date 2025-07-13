@@ -36,7 +36,9 @@
                   rustup default stable
                   rustup component add rust-analyzer
                   #export CARGO_MANIFEST_DIR=$(realpath ./)
+                  set -a
                   source ./API.secret.env
+                  set +a
                 '';
                 LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
                 RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
