@@ -29,12 +29,14 @@
                     alsa-lib
                     libdrm
                     libxkbcommon
+                    codex
                     wayland
                 ];
                 shellHook = ''
                   rustup default stable
                   rustup component add rust-analyzer
                   #export CARGO_MANIFEST_DIR=$(realpath ./)
+                  source ./API.secret.env
                 '';
                 LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
                 RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";

@@ -4,6 +4,7 @@ use super::components::*;
 
 use crate::attack::components::{Attack, AttackTimer, AttackType};
 use crate::bullet::components::BulletType;
+use crate::damage::components::Health;
 use crate::range_system::components::RangeArea;
 use crate::level_loader::Map;
 
@@ -21,13 +22,13 @@ pub fn setup(
     });
     let shape_handle = meshes.add(Cuboid::default());
     let new_pillar_transform= Transform::from_xyz(1.2, 0.5, 1.2);
-    let second_pillar_transform= Transform::from_xyz(2.4, 0.5, 1.2);
     let new_pillar_entity = commands.spawn((
         RangeArea{range: (-4..=5,-4..=5), entities: vec![]},
-        ShooterPillar,
+        ShooterPillar::default(),
         Mesh3d(shape_handle.clone()),
         MeshMaterial3d(shape_material.clone()),
         Attack{attack_type: AttackType::Bullet { bullet_type: BulletType::ShooterPillar}},
+        Health::shooter_pillar_default(),
         new_pillar_transform,
     ))
     .id();

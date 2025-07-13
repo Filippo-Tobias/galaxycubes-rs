@@ -4,6 +4,7 @@ use bevy::prelude::*;
 pub struct BulletData {
     pub range: f32,
     pub damage: i32,
+    pub speed: f32
 }
 
 #[derive(PartialEq, Eq)]
@@ -13,7 +14,7 @@ pub enum BulletType {
 
 impl BulletData {
     pub fn shooter_pillar_default() -> Self {
-        Self { range: 5., damage: 1 }
+        Self { range: 5., damage: 1, speed: 10.0 }
     }
 }
 

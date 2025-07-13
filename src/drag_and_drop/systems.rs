@@ -128,7 +128,7 @@ pub fn move_preview(
                 //Converting the mouse position to the tile position in multiples of 1.2.
                 let material_handle = query_material.get(tower_preview_entity).unwrap();
                 let material = assets_standardmaterial.get_mut(material_handle);
-                match  material {
+                match material {
                     Some(standard_material) => {
                         standard_material.base_color = Color::srgba(0.5, 0.5, 0.5, 0.25)
                     }

@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 mod player_tower;
 mod bullet;
+mod damage;
 mod shooter_pillar;
 mod range_system;
 mod attack;
@@ -31,7 +32,6 @@ fn main() {
         attack::plugins::AttackPlugin,
         drag_and_drop::plugins::DragAndDrop,
         bullet::plugins::BulletPlugin, 
-
 
         DefaultPlugins
         .set(WindowPlugin {

@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::damage::components::Health;
 use crate::shooter_pillar::components::ShooterPillar;
 use crate::attack::components::{Attack, AttackTimer, AttackType};
 use super::bullet_mesh;
@@ -22,7 +23,7 @@ fn spawn_bullet(
                 base_color: Color::srgb(1., 1., 1.),
                 ..Default::default()
             });
-            velocity = Vec3{x: 0.01, y: 0.00, z: 0.00};
+            velocity = Vec3{x: bullet_data.speed, y: 0.0, z: 0.0};
         }
     }
     commands.spawn((
@@ -58,8 +59,10 @@ pub fn check_timers(
 
 pub fn move_bullets (
     mut query_bullet: Query<(&mut Transform, &Bullet, Entity)>,
+    mut query_health: Query<&mut Health>,
     mut commands: Commands,
     map: Res<Map>,
+    time: Res<Time>
 ) {
     for (mut bullet_transform, bullet, bullet_entity) in query_bullet.iter_mut() {
         if bullet_transform.translation.distance(bullet.bullet_origin) > bullet.bullet_data.range * 1.2 {
@@ -68,9 +71,18 @@ pub fn move_bullets (
         let pos_to_map_coord = bullet_transform.translation / Vec3::new(1.2, 1.2, 1.2);
         if map.tower_positions.contains_key(&(pos_to_map_coord.x.round() as i32, pos_to_map_coord.z.round() as i32)) && bullet_transform.translation.distance(bullet.bullet_origin) > 1.2 {
             commands.entity(bullet_entity).despawn();
+            match query_health.get_mut(bullet_entity) {
+                Ok(mut health) => {
+                   health.current_health -= 1 
+                }
+                Err(error) => {
+                    println!("{}", error);
+                }
+            }
         } else {
             println!("{} {}", pos_to_map_coord.x.round() as i32, pos_to_map_coord.z.round() as i32);
         };
-        bullet_transform.translation += bullet.velocity;
+        bullet_transform.translation += bullet.velocity * Vec3{x: time.delta().as_secs_f32(),y: time.delta().as_secs_f32(),z: time.delta().as_secs_f32()};
+        println!("{}", time.delta().as_secs_f32())
     };
 }
