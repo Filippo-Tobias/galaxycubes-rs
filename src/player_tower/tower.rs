@@ -43,9 +43,7 @@ fn on_tower_unhover(event: Trigger<Pointer<Out>>, mut ev_hovered: EventWriter<To
     ev_hovered.send(TowerUnHovered{entity: event.target, position: event.pointer_location.clone()});
 }
 fn on_tower_dragged(event: Trigger<Pointer<Drag>>, mut ev_hovered: EventWriter<TowerDragged>) {
-    // fn on_tower_dragged(event: Trigger<Pointer<Drag>>, mut ev_hovered: EventWriter<TowerDragged>, mut res_locking_camera: ResMut<game_camera::LockingCamera>) {
     ev_hovered.send(TowerDragged{entity: event.target});
-    //res_locking_camera.list.push(event.target);
 }
 
 fn setup(
@@ -112,8 +110,6 @@ fn move_cube (
     query_dirty_position: Query<&DirtyPosition>,
     mut tower_dragged: EventReader<TowerDragged>,
     mut map: ResMut<Map>, // Resource containing tower positions
-    //mut res_locking_camera: ResMut<game_camera::LockingCamera>,
-    mouse_buttons: Res<ButtonInput<MouseButton>>,
 ) {
     let mut dragging = false;
     for event in dragged_events.read() {
