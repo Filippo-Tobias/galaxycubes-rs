@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use bevy::{picking::{pointer::Location, prelude::*}, prelude::*};
 use crate::{game_camera::components::GameCamera, range_system::components::DirtyPosition, level_loader::Map};
 use crate::drag_and_drop::components::{DroppableDropped, DroppableType};
@@ -123,21 +124,17 @@ fn move_cube (
     };
     if dragging {
         let point: Vec3 = game_camera::systems::cursor_ray_to_plane(&windows, &camera_query, &camera_transform_query);
-        let mut option_entity: Option<Entity> = None;
-        for event in tower_dragged.read() {
-            option_entity = Some(event.entity)
-        };
-        let mut transform_tower: Mut<Transform> = tower_query.get_mut(option_entity.unwrap()).unwrap();
-        map.tower_positions.remove(&((transform_tower.translation.x / 1.2) as i32,(transform_tower.translation.z / 1.2) as i32));
-        transform_tower.translation.x = (point.x / 1.2).round() * 1.2;
-        transform_tower.translation.z = (point.z / 1.2).round() * 1.2;
-        map.tower_positions.insert(((transform_tower.translation.x / 1.2) as i32,(transform_tower.translation.z / 1.2) as i32), option_entity.unwrap());
-        //println!("{}", transform_tower.translation);
-    } else if !mouse_buttons.pressed(MouseButton::Left) { //if not dragging stop locking camera.
-        // for entity in query_tower_entity.iter(){
-        //     res_locking_camera.list.retain(|x| x != &entity);
-        // }
-    }
+        let entities: HashSet<Entity> = tower_dragged.read().map(|event| event.entity).collect();
+        for entity in entities {
+            if let Ok(mut tower_transform) = tower_query.get_mut(entity){
+                map.tower_positions.remove(&((tower_transform.translation.x / 1.2) as i32,(tower_transform.translation.z / 1.2) as i32));
+                tower_transform.translation.x = (point.x / 1.2).round() * 1.2;
+                tower_transform.translation.z = (point.z / 1.2).round() * 1.2;
+                map.tower_positions.insert(((tower_transform.translation.x / 1.2) as i32,(tower_transform.translation.z / 1.2) as i32), entity);
+            };
+        }
+
+    } 
 }
 
 #[allow(clippy::too_many_arguments)]

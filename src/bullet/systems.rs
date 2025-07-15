@@ -68,21 +68,17 @@ pub fn move_bullets (
         if bullet_transform.translation.distance(bullet.bullet_origin) > bullet.bullet_data.range * 1.2 {
             commands.entity(bullet_entity).despawn();
         };
-        let pos_to_map_coord = bullet_transform.translation / Vec3::new(1.2, 1.2, 1.2);
-        if map.tower_positions.contains_key(&(pos_to_map_coord.x.round() as i32, pos_to_map_coord.z.round() as i32)) && bullet_transform.translation.distance(bullet.bullet_origin) > 1.2 {
+        let map_coordinate = bullet_transform.translation / Vec3::new(1.2, 1.2, 1.2);
+        let hashmap_key = (map_coordinate.x.round() as i32, map_coordinate.z.round() as i32);
+        if map.tower_positions.contains_key(&hashmap_key) && bullet_transform.translation.distance(bullet.bullet_origin) > 1.2 {
             commands.entity(bullet_entity).despawn();
-            match query_health.get_mut(bullet_entity) {
-                Ok(mut health) => {
-                   health.current_health -= 1 
-                }
-                Err(error) => {
-                    println!("{}", error);
+            if let Some(entity) = map.tower_positions.get(&hashmap_key) {
+                if let Ok(mut health) = query_health.get_mut(*entity) {
+                       health.current_health -= 1 
+                    
                 }
             }
-        } else {
-            println!("{} {}", pos_to_map_coord.x.round() as i32, pos_to_map_coord.z.round() as i32);
         };
         bullet_transform.translation += bullet.velocity * Vec3{x: time.delta().as_secs_f32(),y: time.delta().as_secs_f32(),z: time.delta().as_secs_f32()};
-        println!("{}", time.delta().as_secs_f32())
     };
 }

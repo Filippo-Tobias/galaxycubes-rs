@@ -17,7 +17,7 @@ pub fn check_ranges(
                 println!("within range")
             } else {
                 if range_area.entities.contains(&entity){
-                    println!("left rnge")
+                    println!("left range")
                 }
                 range_area.entities.retain(|x| *x != entity);
             }
