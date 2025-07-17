@@ -5,7 +5,6 @@ mod damage;
 mod shooter_pillar;
 mod range_system;
 mod attack;
-use player_tower::tower;
 mod mini_editor;
 mod game_camera;
 mod level_loader;
@@ -21,7 +20,7 @@ fn main() {
     .add_plugins((   
         EmbeddedAssetPlugin{mode: bevy_embedded_assets::PluginMode::ReplaceDefault},
         //mini_editor::MiniEditor{editor_open: false},
-        tower::TowerPlugin,
+        player_tower::plugins::TowerPlugin,
         game_camera::plugins::GameCameraPlugin,
         level_loader::LevelLoaderPlugin,
         MeshPickingPlugin,

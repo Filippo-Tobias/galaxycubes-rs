@@ -1,52 +1,23 @@
+use bevy::prelude::*;
+
 use std::collections::HashSet;
-use bevy::{picking::{pointer::Location, prelude::*}, prelude::*};
+use super::components;
 use crate::{damage::components::Health, game_camera::components::GameCamera, level_loader::Map, range_system::components::DirtyPosition};
 use crate::drag_and_drop::components::{DroppableDropped, DroppableType};
 use crate::game_camera;
-pub struct TowerPlugin;
 
-impl Plugin for TowerPlugin{
-    fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup);
-        app.add_systems(Update, (move_cube, spawn_cube_on_drop));
-        app.add_event::<TowerHovered>();
-        app.add_event::<TowerUnHovered>();
-        app.add_event::<TowerDragged>();
-    }
+fn on_tower_hover(event: Trigger<Pointer<Over>>, mut ev_hovered: EventWriter<components::TowerHovered>) {
+    ev_hovered.send(components::TowerHovered{entity: event.target, position: event.pointer_location.clone()});
 }
 
-#[derive(Component)]
-pub struct Tower;
-
-#[derive(Event)]
-#[allow(dead_code)]
-pub struct TowerHovered {
-    pub entity: Entity,
-    pub position: Location,
+fn on_tower_unhover(event: Trigger<Pointer<Out>>, mut ev_hovered: EventWriter<components::TowerUnHovered>) {
+    ev_hovered.send(components::TowerUnHovered{entity: event.target, position: event.pointer_location.clone()});
 }
-#[derive(Event)]
-#[allow(dead_code)]
-pub struct TowerUnHovered {
-    pub entity: Entity,
-    pub position: Location,
-}
-#[derive(Event)]
-pub struct TowerDragged{
-    pub entity: Entity,
+fn on_tower_dragged(event: Trigger<Pointer<Drag>>, mut ev_hovered: EventWriter<components::TowerDragged>) {
+    ev_hovered.send(components::TowerDragged{entity: event.target});
 }
 
-fn on_tower_hover(event: Trigger<Pointer<Over>>, mut ev_hovered: EventWriter<TowerHovered>) {
-    ev_hovered.send(TowerHovered{entity: event.target, position: event.pointer_location.clone()});
-}
-
-fn on_tower_unhover(event: Trigger<Pointer<Out>>, mut ev_hovered: EventWriter<TowerUnHovered>) {
-    ev_hovered.send(TowerUnHovered{entity: event.target, position: event.pointer_location.clone()});
-}
-fn on_tower_dragged(event: Trigger<Pointer<Drag>>, mut ev_hovered: EventWriter<TowerDragged>) {
-    ev_hovered.send(TowerDragged{entity: event.target});
-}
-
-fn setup(
+pub fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     asset_server: Res<AssetServer>,
@@ -73,7 +44,7 @@ fn setup(
         -12.0);
 
     let new_tower_entity = commands.spawn((
-        Tower,
+        components::Tower,
         Mesh3d(shape_handle.clone()),
         MeshMaterial3d(shape_material.clone()),
         tower_transform,
@@ -88,7 +59,7 @@ fn setup(
     //Insert takes v as V (v: V) meaning the entity passed will be copied since the entity trait implements the copy trait.
 
     let new_tower_entity = commands.spawn((
-        Tower,
+        components::Tower,
         Mesh3d(shape_handle.clone()),
         MeshMaterial3d(shape_material.clone()),
         tower_transform2,
@@ -102,15 +73,15 @@ fn setup(
 } 
 
 #[allow(clippy::too_many_arguments)]
-fn move_cube (
+pub fn move_cube (
     windows: Query<&Window>,
-    mut dragged_events: EventReader<TowerDragged>,
+    mut dragged_events: EventReader<components::TowerDragged>,
     mut commands: Commands,
     camera_query: Query<&Camera, With<GameCamera>>,
     camera_transform_query: Query<&GlobalTransform, With<GameCamera>>,
-    mut tower_query: Query<&mut Transform, With<Tower>>,
+    mut tower_query: Query<&mut Transform, With<components::Tower>>,
     query_dirty_position: Query<&DirtyPosition>,
-    mut tower_dragged: EventReader<TowerDragged>,
+    mut tower_dragged: EventReader<components::TowerDragged>,
     mut map: ResMut<Map>, // Resource containing tower positions
 ) {
     let mut dragging = false;
@@ -136,7 +107,7 @@ fn move_cube (
 }
 
 #[allow(clippy::too_many_arguments)]
-fn spawn_cube_on_drop(
+pub fn spawn_cube_on_drop(
     mut commands: Commands,
     mut ev_dropped: EventReader<DroppableDropped>,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -158,7 +129,7 @@ fn spawn_cube_on_drop(
         if drop.droppable_type == DroppableType::Tower && !map.tower_positions.contains_key(&((point.x / 1.2).round() as i32, (point.z / 1.2).round() as i32)) {
             {
                 let new_tower_entity = commands.spawn((
-                    Tower,
+                    components::Tower,
                     Mesh3d(shape_handle.clone()),
                     MeshMaterial3d(shape_material.clone()),
                     Transform::from_translation(drop.position),
@@ -176,3 +147,4 @@ fn spawn_cube_on_drop(
             
 }
     
+
