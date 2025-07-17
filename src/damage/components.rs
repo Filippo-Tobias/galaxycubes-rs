@@ -1,14 +1,19 @@
 use bevy::prelude::*;
 
-#[derive(Component)]
-pub struct Damageable {
-    pub immune: bool,
+use crate::attack::components::AttackInstance;
+
+#[derive(Event)]
+pub struct DamageEvent {
+    pub attack_instance: AttackInstance,
+    pub target_entity: Entity,
 }
 
 #[derive(Component)]
 pub struct Health {
     pub current_health: i32,
+    #[allow(dead_code)]
     pub max_health: i32,
+    //Not read for now but eventually will be used
 }
 
 impl Health {

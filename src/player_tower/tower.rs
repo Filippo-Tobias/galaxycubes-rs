@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 use bevy::{picking::{pointer::Location, prelude::*}, prelude::*};
-use crate::{game_camera::components::GameCamera, range_system::components::DirtyPosition, level_loader::Map};
+use crate::{damage::components::Health, game_camera::components::GameCamera, level_loader::Map, range_system::components::DirtyPosition};
 use crate::drag_and_drop::components::{DroppableDropped, DroppableType};
 use crate::game_camera;
 pub struct TowerPlugin;
@@ -76,7 +76,8 @@ fn setup(
         Tower,
         Mesh3d(shape_handle.clone()),
         MeshMaterial3d(shape_material.clone()),
-        tower_transform
+        tower_transform,
+        Health::player_tower_default()
     ))
     .observe(on_tower_hover)
     .observe(on_tower_unhover)
@@ -90,7 +91,8 @@ fn setup(
         Tower,
         Mesh3d(shape_handle.clone()),
         MeshMaterial3d(shape_material.clone()),
-        tower_transform2
+        tower_transform2,
+        Health::player_tower_default()
     ))
     .id();
     commands.entity(new_tower_entity).observe(on_tower_hover);
@@ -159,7 +161,9 @@ fn spawn_cube_on_drop(
                     Tower,
                     Mesh3d(shape_handle.clone()),
                     MeshMaterial3d(shape_material.clone()),
-                    Transform::from_translation(drop.position)
+                    Transform::from_translation(drop.position),
+                    Health{max_health: 10, current_health: 10},
+
                 ))
                 .observe(on_tower_hover)
                 .observe(on_tower_unhover)

@@ -27,7 +27,7 @@ pub fn setup(
         ShooterPillar::default(),
         Mesh3d(shape_handle.clone()),
         MeshMaterial3d(shape_material.clone()),
-        Attack{attack_type: AttackType::Bullet { bullet_type: BulletType::ShooterPillar}},
+        Attack{attack_type: AttackType::Bullet(BulletType::ShooterPillar)},
         Health::shooter_pillar_default(),
         new_pillar_transform,
     ))

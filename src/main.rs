@@ -32,6 +32,7 @@ fn main() {
         attack::plugins::AttackPlugin,
         drag_and_drop::plugins::DragAndDrop,
         bullet::plugins::BulletPlugin, 
+        damage::plugins::DamagePlugin,
 
         DefaultPlugins
         .set(WindowPlugin {
