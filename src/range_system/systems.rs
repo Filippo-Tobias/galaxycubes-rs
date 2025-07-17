@@ -14,12 +14,9 @@ pub fn check_ranges(
             & range_area.range.1.contains(&((transform.translation.z/1.2) as i32)) {
                 flag_remove_dirty = true;
                 range_area.entities.push(entity);
-                println!("within range")
             } else {
-                if range_area.entities.contains(&entity){
-                    println!("left range")
-                }
                 range_area.entities.retain(|x| *x != entity);
+                flag_remove_dirty = true;
             }
         }
         if flag_remove_dirty {
