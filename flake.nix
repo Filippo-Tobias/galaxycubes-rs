@@ -39,6 +39,7 @@
                   set -a
                   source ./API.secret.env
                   set +a
+                  exec zsh
                 '';
                 LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
                 RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";

@@ -33,7 +33,7 @@ fn make_default_map (
     make_map(commands, meshes, materials, map_ranges);
 }
 
-fn make_map(
+pub fn make_map(
     mut commands: Commands,
     meshes: ResMut<Assets<Mesh>>,
     materials: ResMut<Assets<StandardMaterial>>,
