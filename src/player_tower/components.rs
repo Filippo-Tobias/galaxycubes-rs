@@ -19,4 +19,7 @@ pub struct TowerUnHovered {
 pub struct TowerDragged{
     pub entity: Entity,
 }
-
+#[derive(Event)]
+pub struct NewTower{
+    pub location: Vec3,
+}

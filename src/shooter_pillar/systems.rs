@@ -33,5 +33,36 @@ pub fn setup(
     ))
     .id();
     commands.entity(new_pillar_entity).insert(AttackTimer::new(Timer::from_seconds(2.0, TimerMode::Repeating)));
-    map.tower_positions.insert(((new_pillar_transform.translation.x /1.2) as i32 , (new_pillar_transform.translation.z /1.2) as i32 ), new_pillar_entity);
+    map.add_entity(new_pillar_entity, ((new_pillar_transform.translation.x / 1.2).round() as i32 , (new_pillar_transform.translation.y / 1.2).round() as i32, (new_pillar_transform.translation.z / 1.2).round() as i32 ));
+}
+
+pub fn spawn_pillar_on_event(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    asset_server: Res<AssetServer>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut map: ResMut<Map>,
+    mut pillar_spawn_ev: EventReader<NewShooterPillar>,
+) {
+    for ev in pillar_spawn_ev.read() {
+        let texture_handle = asset_server.load("Enemies/Enemy2.png");
+        let shape_material = materials.add(StandardMaterial {
+            base_color_texture: Some(texture_handle),
+            ..default()
+        });
+        let shape_handle = meshes.add(Cuboid::default());
+        let new_pillar_transform= Transform::from_translation(ev.location);
+        let new_pillar_entity = commands.spawn((
+            RangeArea{range: (-4..=5,-4..=5), entities: vec![]},
+            ShooterPillar::default(),
+            Mesh3d(shape_handle.clone()),
+            MeshMaterial3d(shape_material.clone()),
+            Attack{attack_type: AttackType::Bullet(BulletType::ShooterPillar)},
+            Health::shooter_pillar_default(),
+            new_pillar_transform,
+        ))
+        .id();
+        commands.entity(new_pillar_entity).insert(AttackTimer::new(Timer::from_seconds(2.0, TimerMode::Repeating)));
+        map.add_entity(new_pillar_entity, ((new_pillar_transform.translation.x / 1.2).round() as i32 , (new_pillar_transform.translation.y / 1.2).round() as i32, (new_pillar_transform.translation.z / 1.2).round() as i32 ));
+    }
 }

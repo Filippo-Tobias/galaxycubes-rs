@@ -2,7 +2,6 @@ use bevy::math::DVec3;
 use bevy::prelude::*;
 
 use bevy::render::camera::ScalingMode;
-use bevy::render::render_resource::ShaderType;
 use bevy::{input::mouse::{MouseMotion, MouseWheel}, render::camera::RenderTarget, window::{CursorGrabMode, PrimaryWindow, WindowRef}};
 use super::components::GameCamera;
 use crate::level_loader::{Map, MapDragged};
@@ -112,28 +111,19 @@ pub fn cursor_ray_to_plane(
     let Some(cursor_position) = windows.single().cursor_position() else {
         return Vec3::ZERO;
     };
-    let mut intersection_points: Vec<(Vec3, f32)> = Vec::new();
+    let mut ray_intersections: Vec<Vec3> = Vec::new();
     for plane in map.map_ranges.clone() {
-        if let Ok(ray) = camera.viewport_to_world(camera_transform, cursor_position) {
-            if let Some(distance) = ray.intersect_plane(Vec3{x:0.0,y:plane.0.y as f32,z:0.0}, InfinitePlane3d::new(Vec3{x:0.0,y:1.0,z:0.0})) {
-                let point = ray.get_point(distance);
-                if point.x < plane.1.x as f32 && point.x > plane.0.x as f32 && point.z < plane.1.z as f32 && point.z > plane.0.z as f32 {
-                    intersection_points.push((point, distance));
-                }
-            };
+        let Ok(ray) = camera.viewport_to_world(camera_transform, cursor_position) else {
+            return Vec3::ZERO;
         };
-    };
-    if intersection_points.is_empty() {
-        Vec3::ZERO
-    } else {
-        let mut closest:(Vec3,f32) = (Vec3::ZERO, f32::INFINITY);
-        for (point, distance) in intersection_points {
-            if distance < closest.1 {
-                closest = (point,distance);
-            }
-        }
-        closest.0
+        let Some(distance) = ray.intersect_plane(Vec3{x:0.0,y:0.0,z:0.0}, InfinitePlane3d::new(Vec3{x:0.0,y:plane.0.y as f32,z:0.0}))
+        else {
+            return Vec3::ZERO;
+        };
+        ray.get_point(distance);
+        //store distance from intersection all planes
     }
+        return Vec3::ZERO;
 }
 
 pub fn plane_from_corners(top_left: DVec3, bottom_right: DVec3) -> (Plane3d, Vec3) {

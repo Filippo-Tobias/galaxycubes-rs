@@ -69,7 +69,7 @@ pub fn move_bullets (
             commands.entity(bullet_entity).despawn();
         };
         let map_coordinate = bullet_transform.translation / Vec3::new(1.2, 1.2, 1.2);
-        let hashmap_key = (map_coordinate.x.round() as i32, map_coordinate.z.round() as i32);
+        let hashmap_key = (map_coordinate.x.round() as i32, map_coordinate.y.round() as i32, map_coordinate.z.round() as i32);
         if map.tower_positions.contains_key(&hashmap_key) && bullet_transform.translation.distance(bullet.bullet_origin) > 1.2 {
             commands.entity(bullet_entity).despawn();
             if let Some(entity) = map.tower_positions.get(&hashmap_key) {

@@ -6,6 +6,11 @@ pub struct ShooterPillar{
     attack_cooldown: f32,
 }
 
+#[derive(Event)]
+pub struct NewShooterPillar{
+    pub location: Vec3,
+}
+
 impl Default for ShooterPillar {
     fn default() -> Self {
         Self{
@@ -14,3 +19,4 @@ impl Default for ShooterPillar {
         }
     }
 }
+

@@ -43,6 +43,7 @@ fn on_dragged(
     windows: Query<&Window>,
     camera_query: Query<&Camera, With<GameCamera>>,
     camera_transform_query: Query<&GlobalTransform, With<GameCamera>>,
+    map: ResMut<Map>
 ) {
     //Spawn a cube as a preview of the tower if the drag just started.
     if !query.single_mut().dragging {
@@ -53,7 +54,7 @@ fn on_dragged(
             alpha_mode: AlphaMode::Blend,
             ..default()
         });
-        let mut tower_transform = cursor_ray_to_plane(&windows, &camera_query, &camera_transform_query);
+        let mut tower_transform = cursor_ray_to_plane(&windows, &camera_query, &camera_transform_query, &map);
         tower_transform.y = 0.5; // Fixed y position for the cube
         let shape_handle = meshes.add(Cuboid::default());
         commands.spawn((
@@ -76,12 +77,13 @@ pub fn check_if_dragging(
     mut ev_dropped: EventWriter<DroppableDropped>,
     camera_query: Query<&Camera, With<GameCamera>>,
     camera_transform_query: Query<&GlobalTransform, With<GameCamera>>,
+    map: ResMut<Map>,
 ) {
     let dragging = query.single_mut().dragging;
     if buttons.just_released(MouseButton::Left) {
-        let point = cursor_ray_to_plane(&windows, &camera_query, &camera_transform_query);
+        let point = cursor_ray_to_plane(&windows, &camera_query, &camera_transform_query, &map);
         let x = (point.x / 1.2).round() * 1.2;
-        let y = 0.5; // Fixed y position for the cube
+        let y = (point.y / 1.2).round() * 1.2 + 0.5;
         let z = (point.z / 1.2).round() * 1.2;
         let new_point = Vec3::new(x, y, z);
         if dragging {
@@ -105,15 +107,16 @@ pub fn move_preview(
     camera_transform_query: Query<&GlobalTransform, With<GameCamera>>,
     query_material: Query<&mut MeshMaterial3d<StandardMaterial>, With<TowerPreview>>,
     mut assets_standardmaterial: ResMut<Assets<StandardMaterial>>,
-    map: Res<Map>, // Resource containing tower positions
+    map: ResMut<Map>, // Resource containing tower positions
 ) {
-    let point: Vec3 = game_camera::systems::cursor_ray_to_plane(&windows, &camera_query, &camera_transform_query);
+    let point: Vec3 = game_camera::systems::cursor_ray_to_plane(&windows, &camera_query, &camera_transform_query, &map);
     for tower_preview_entity in query_tower_preview_entity.iter_mut() {
         let tower_preview: &TowerPreview = query_tower_preview.get(tower_preview_entity).unwrap();
         if tower_preview.droppable_type == DroppableType::Tower {
             query_tower_preview_transform.get_mut(tower_preview_entity).unwrap().translation.x = (point.x / 1.2).round() * 1.2;
+            query_tower_preview_transform.get_mut(tower_preview_entity).unwrap().translation.y = (point.y / 1.2).round() * 1.2 + 0.5;
             query_tower_preview_transform.get_mut(tower_preview_entity).unwrap().translation.z = (point.z / 1.2).round() * 1.2;
-            if map.tower_positions.contains_key(&((point.x / 1.2).round() as i32, (point.z / 1.2).round() as i32)) {
+            if map.tower_positions.contains_key(&((point.x / 1.2).round() as i32, (point.y / 1.2).round() as i32, (point.z / 1.2).round() as i32)) {
             //Converting the mouse position to the tile position in multiples of 1.2.
                 let material_handle = query_material.get(tower_preview_entity).unwrap();
                 let material = assets_standardmaterial.get_mut(material_handle);
@@ -123,7 +126,7 @@ pub fn move_preview(
                     }
                     None => print!("MeshMaterial3d doesn't contain material (shouldn't happen)")
                 }
-                query_tower_preview_transform.get_mut(tower_preview_entity).unwrap().translation.y = 1.5;
+                query_tower_preview_transform.get_mut(tower_preview_entity).unwrap().translation.y += 1.0;
                 //Make the new tower appear on top
             } else {
                 //Converting the mouse position to the tile position in multiples of 1.2.
@@ -135,7 +138,7 @@ pub fn move_preview(
                     }
                     None => print!("MeshMaterial3d doesn't contain material (shouldn't happen)")
                 }
-                query_tower_preview_transform.get_mut(tower_preview_entity).unwrap().translation.y = 0.5;
+                query_tower_preview_transform.get_mut(tower_preview_entity).unwrap().translation.y = (point.y / 1.2).round() * 1.2 + 0.5;
                 //Reset tower position back to normal
             }
 

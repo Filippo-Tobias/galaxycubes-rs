@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+mod swarm_mode;
 mod player_tower;
 mod bullet;
 mod damage;
@@ -32,6 +33,7 @@ fn main() {
         drag_and_drop::plugins::DragAndDrop,
         bullet::plugins::BulletPlugin, 
         damage::plugins::DamagePlugin,
+        swarm_mode::plugins::SwarmModePlugin,
 
         DefaultPlugins
         .set(WindowPlugin {
